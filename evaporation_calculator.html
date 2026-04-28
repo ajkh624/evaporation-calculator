@@ -1227,7 +1227,12 @@ input[type=range].ha-range { accent-color: #0d9488; }
 
   <!-- ── HA 대체 보습제 비교 ──────────────────────── -->
   <div class="panel exp-panel">
-    <div class="section-title">🔄 HA 대체 보습제 비교 — 잔류 평형 부피 계산</div>
+    <details id="alt-details">
+    <summary style="list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;user-select:none;">
+      <span id="alt-arrow" style="font-size:0.7rem;color:#7c3aed;transition:transform 0.2s;display:inline-block;">▶</span>
+      <span class="section-title" style="margin-bottom:0;">🔄 HA 대체 보습제 비교 — 잔류 평형 부피 계산</span>
+    </summary>
+    <div style="margin-top:14px;">
 
     <p class="exp-intro" style="border-left-color:#7c3aed; background:#fdf4ff;">
       글리세린·PG·부틸렌 글리콜은 상온 액체 상태의 저가 화장품 성분으로 HA의 대체 후보입니다.
@@ -1429,6 +1434,8 @@ input[type=range].ha-range { accent-color: #0d9488; }
       <strong>HA와 글리세린/BG의 블렌딩</strong>이 비용·성능 균형에서 최적 전략임.
     </div>
 
+    </div><!-- end details-body -->
+    </details>
   </div><!-- end alt-panel -->
 
 </main>
@@ -2218,6 +2225,15 @@ const expArrow   = document.getElementById('exp-arrow');
 if (expDetails && expArrow) {
   expDetails.addEventListener('toggle', () => {
     expArrow.style.transform = expDetails.open ? 'rotate(90deg)' : 'rotate(0deg)';
+  });
+}
+
+// HA 대체 보습제 비교 드롭다운 화살표
+const altDetails = document.getElementById('alt-details');
+const altArrow   = document.getElementById('alt-arrow');
+if (altDetails && altArrow) {
+  altDetails.addEventListener('toggle', () => {
+    altArrow.style.transform = altDetails.open ? 'rotate(90deg)' : 'rotate(0deg)';
   });
 }
 
