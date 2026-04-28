@@ -460,6 +460,78 @@ input[type=range].ha-range { accent-color: #0d9488; }
   .metrics-grid { grid-template-columns: repeat(2, 1fr); }
   .explain-grid { grid-template-columns: 1fr; }
 }
+
+/* ── 설명 섹션 ── */
+.desc-section {
+  max-width: 1300px;
+  margin: 16px auto 0;
+  padding: 0 14px;
+}
+.desc-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  border-left: 4px solid #2563eb;
+}
+.desc-card h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.desc-card h2 .icon { font-size: 1.1rem; }
+.desc-card .subtitle {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.desc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.desc-block { }
+.desc-block h3 {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #2563eb;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.desc-block ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.desc-block ul li {
+  font-size: 0.8rem;
+  color: #334155;
+  line-height: 1.7;
+  padding-left: 14px;
+  position: relative;
+}
+.desc-block ul li::before {
+  content: '·';
+  position: absolute;
+  left: 2px;
+  color: #94a3b8;
+  font-weight: 700;
+}
+.desc-block ul li strong {
+  color: #1e40af;
+  font-weight: 600;
+}
+@media (max-width: 900px) {
+  .desc-grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
@@ -472,6 +544,45 @@ input[type=range].ha-range { accent-color: #0d9488; }
   </div>
   <span class="badge">무풍 · 실리콘 표면</span>
 </header>
+
+<!-- ── 설명 섹션 ────────────────────────────────── -->
+<section class="desc-section">
+  <div class="desc-card">
+    <h2><span class="icon">🔬</span> 증발 평형 조건 탐색 시뮬레이터</h2>
+    <p class="subtitle">
+      실리콘 컵 내 수분이 <strong>더 이상 줄어들지 않는 평형 상태</strong>에 도달하는 조건을 찾기 위한 시뮬레이터입니다.<br>
+      온도·습도·HA 농도 등 증발 요인을 조절하며 <strong>부피 변화가 멈추는 시점(증발 평형)</strong>을 직접 탐색할 수 있습니다.
+    </p>
+    <div class="desc-grid">
+      <div class="desc-block">
+        <h3>시뮬레이터 목적</h3>
+        <ul>
+          <li><strong>증발 평형 조건 탐색</strong> — 부피 변화량이 0에 수렴하는 환경 파라미터 조합 탐색</li>
+          <li><strong>요인별 민감도 확인</strong> — 각 변수가 증발 속도·평형점에 미치는 영향 직접 비교</li>
+          <li><strong>정량적 예측</strong> — Stefan 확산 모델 기반 물리 수식으로 수치 결과 산출</li>
+        </ul>
+      </div>
+      <div class="desc-block">
+        <h3>증발 평형이란?</h3>
+        <ul>
+          <li><strong>정의</strong> — 증발 속도와 응결 속도가 같아져 액체 부피가 일정하게 유지되는 상태</li>
+          <li><strong>조건</strong> — 수면 위 수증기 분압 = 주변 공기의 수증기 분압 (상대습도 100%에 수렴)</li>
+          <li><strong>시뮬레이터 판단 기준</strong> — 단위 시간당 부피 변화율 &lt; 0.001 mL/hr 일 때 평형 도달로 간주</li>
+        </ul>
+      </div>
+      <div class="desc-block">
+        <h3>조절 가능한 주요 요인</h3>
+        <ul>
+          <li><strong>온도 (T)</strong> — 높을수록 포화수증기압 상승 → 증발 가속</li>
+          <li><strong>상대습도 (RH)</strong> — 높을수록 증발 구동력 감소 → 평형 도달 빠름</li>
+          <li><strong>HA 농도</strong> — 용질이 증가하면 수분 활성도 저하 → 증발 억제</li>
+          <li><strong>컵 형상 (직경·높이)</strong> — 확산 경로 길이·수면 면적 변화 → 증발 속도 조절</li>
+          <li><strong>초기 충전율</strong> — 수면~컵 입구 거리(확산 경로)에 직접 영향</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
 
 <main>
 
