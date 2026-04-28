@@ -1085,33 +1085,35 @@ input[type=range].ha-range { accent-color: #0d9488; }
     </p>
 
     <!-- 이론 예측 -->
-    <div class="exp-sub">① 이론적 예측 (시뮬레이터, RH = 95 %, T = 25 °C)</div>
+    <div class="exp-sub">① 이론적 예측 (시뮬레이터, RH = 50 %, T = 25 °C — 상온 조건)</div>
     <p style="font-size:0.80rem;color:#64748b;margin-bottom:8px;">
       평형 농도 c<sub>eq</sub> = √(−ln(RH) / k₂),&nbsp;&nbsp;
-      잔류 비율 V<sub>eq</sub>/V₀ = c₀ / c<sub>eq</sub>
+      잔류 비율 V<sub>eq</sub>/V₀ = c₀ / c<sub>eq</sub>&nbsp;&nbsp;
+      [RH = 0.50 → c<sub>eq</sub>(1 MDa) = √(0.6931 / 1.36×10⁻⁴) = <strong>71.4 mg/mL</strong>]
     </p>
     <table class="exp-table">
       <thead><tr>
         <th>그룹</th><th>재료</th><th>c₀ (mg/mL)</th>
-        <th>c<sub>eq</sub> (mg/mL)</th><th>예측 V<sub>eq</sub>/V₀</th><th>목적</th>
+        <th>c<sub>eq</sub> (mg/mL)</th><th>a<sub>w,init</sub></th><th>예측 V<sub>eq</sub>/V₀</th><th>목적</th>
       </tr></thead>
       <tbody>
         <tr class="ctrl-row">
-          <td>CTL</td><td>탈이온수</td><td>—</td><td>—</td>
+          <td>CTL</td><td>탈이온수</td><td>—</td><td>—</td><td>1.000</td>
           <td><span class="exp-badge ctrl">~0 %</span></td><td>음성 대조군 (완전 증발)</td>
         </tr>
         <tr>
-          <td>G-Sub</td><td>1 MDa HA</td><td>8.0</td><td>19.4</td>
-          <td><span class="exp-badge fail">~41 %</span></td><td>미달 비교군</td>
+          <td>G-Sub</td><td>1 MDa HA</td><td>30.0</td><td>71.4</td><td>0.885</td>
+          <td><span class="exp-badge fail">~42 %</span></td><td>미달 비교군</td>
         </tr>
         <tr class="target-row">
-          <td>G-Target</td><td>1 MDa HA</td><td>16.5</td><td>19.4</td>
+          <td>G-Target</td><td>1 MDa HA</td><td>60.7</td><td>71.4</td><td>0.606</td>
           <td><span class="exp-badge pass">≥ 85 %</span></td><td>목표 조건 ★</td>
         </tr>
       </tbody>
     </table>
     <div class="exp-note">
-      세 그룹 모두 초기 수분 활성도 a<sub>w,init</sub> &gt; RH 이므로 증발이 시작됨.
+      세 그룹 모두 a<sub>w,init</sub> &gt; RH (0.50) 이므로 증발이 시작됨.
+      G-Target: a<sub>w</sub>(60.7 mg/mL) = exp(−1.36×10⁻⁴ × 60.7²) = 0.606 &gt; 0.50 ✓&nbsp;&nbsp;
       질량 변화 예측: 1.500 mg → 1.275 mg (△ 225 μg). &nbsp;n = 5 per group, 총 15 샘플.
     </div>
 
@@ -1129,7 +1131,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
       <div class="exp-box">
         <div class="exp-box-title">장비</div>
         <ul>
-          <li>항온항습 챔버 (±0.1 °C, ±0.5 % RH)</li>
+          <li>디지털 온습도계 (±0.5 % RH 분해능, 연속 기록 가능)</li>
           <li>마이크로밸런스 (분해능 1 μg)</li>
           <li>마이크로피펫 0.5–2 μL (교정됨)</li>
           <li>데이터로거 (1 min 간격 자동 기록)</li>
@@ -1147,7 +1149,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
         <span><strong>[아이패치 전처리]</strong> 실리콘 아이패치를 에탄올 → 탈이온수 3회 세척 후 60 °C 오븐 건조 1 h. 챔버 내부에서 24 h 이상 보관하여 표면 흡착 평형화.</span>
       </li>
       <li><span class="exp-step-n">3</span>
-        <span><strong>[챔버 안정화]</strong> T = 25 °C, RH = 95 % 설정 후 최소 2 h 대기. 챔버 내 온습도 센서로 조건 확인.</span>
+        <span><strong>[환경 조건 확인]</strong> 실험실 상온 조건 T = 25 ± 2 °C, RH = 50 ± 5 % 확인. 디지털 온습도계로 실시간 모니터링. 에어컨/환기구 근처 또는 직사광선 위치 피할 것. (별도 항온항습 챔버 불필요)</span>
       </li>
       <li><span class="exp-step-n">4</span>
         <span><strong>[기준 질량 기록]</strong> 아이패치를 마이크로밸런스 위에 올려 기준 질량 m<sub>patch</sub> 기록.</span>
@@ -1189,9 +1191,10 @@ input[type=range].ha-range { accent-color: #0d9488; }
       <div class="exp-box">
         <div class="exp-box-title">성공 기준</div>
         <ul>
-          <li>G-Target: V<sub>eq</sub>/V₀ ≥ 85 %, p &lt; 0.05 ✓</li>
-          <li>G-Sub: V<sub>eq</sub>/V₀ &lt; 85 % (대비 확인)</li>
+          <li>G-Target (60.7 mg/mL): V<sub>eq</sub>/V₀ ≥ 85 %, p &lt; 0.05 ✓</li>
+          <li>G-Sub (30.0 mg/mL): V<sub>eq</sub>/V₀ &lt; 85 % (~42% 예측)</li>
           <li>CTL: V<sub>eq</sub>/V₀ ≈ 0 % (HA 효과 인과성)</li>
+          <li>실험 중 RH = 50 ± 5 % 유지 확인</li>
           <li>시뮬레이터 대비 r² ≥ 0.85</li>
         </ul>
       </div>
@@ -1204,9 +1207,10 @@ input[type=range].ha-range { accent-color: #0d9488; }
       </div>
     </div>
     <div class="exp-success">
-      ★ G-Target (1 MDa HA, 16.5 mg/mL, RH 95 %, T 25 °C) 에서 V<sub>eq</sub>/V₀ ≥ 85 %
+      ★ G-Target (1 MDa HA, 60.7 mg/mL, RH 50 %, T 25 °C <strong>상온</strong>) 에서 V<sub>eq</sub>/V₀ ≥ 85 %
       <span style="font-weight:400;">(= 증발된 부피 ≤ 15%)</span> 확인 시 목표 달성.
-      순수물 대비와 저농도 그룹이 각각 음성·비교 대조를 제공하여 HA 농도 임계값의 인과관계를 통계적으로 입증.
+      순수물 대비와 저농도 그룹(30.0 mg/mL, ~42%)이 각각 음성·비교 대조를 제공하여 HA 농도 임계값의 인과관계를 통계적으로 입증.
+      상온 조건이므로 별도 항온항습 챔버 없이 일반 실험실에서 수행 가능.
     </div>
 
   </div><!-- end exp-panel -->
@@ -1258,7 +1262,12 @@ input[type=range].ha-range { accent-color: #0d9488; }
     <!-- 핵심 비교: c_eq 및 85% 조건 -->
     <div class="exp-sub">② 평형 농도 c<sub>eq</sub> 및 85% 달성 조건 (RH = 95 %, T = 25 °C)</div>
     <p style="font-size:0.79rem;color:#64748b;margin-bottom:8px;">
-      c<sub>eq</sub> : 증발이 멈추는 농도. &nbsp; V<sub>eq</sub>/V₀ = c₀/c<sub>eq</sub>
+      c<sub>eq</sub> : 증발이 멈추는 농도. &nbsp; V<sub>eq</sub>/V₀ = c₀/c<sub>eq</sub> &nbsp;·&nbsp;
+      a<sub>w</sub>(c₀) : 85% 달성 c₀에서 계산한 초기 수분 활성도 (a<sub>w</sub> &gt; RH이면 증발 시작 ✓)
+    </p>
+    <p style="font-size:0.76rem;color:#94a3b8;margin-bottom:8px;">
+      HA: a<sub>w</sub> = exp(−k₂·c²) &nbsp;(k₂=1.36×10⁻⁴ for 1 MDa) &nbsp;·&nbsp;
+      소분자: a<sub>w</sub> = exp(−k·c), k = −ln(0.95)/c<sub>eq</sub> (c<sub>eq</sub>에서 RH와 일치하도록 역산)
     </p>
     <table class="exp-table">
       <thead><tr>
@@ -1266,6 +1275,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
         <th>c<sub>eq</sub> (mg/mL)</th>
         <th>85 % 달성 c₀</th>
         <th>% w/w</th>
+        <th>a<sub>w</sub> (c₀에서)</th>
         <th>용해도</th>
         <th>HA 대비 필요량</th>
         <th>1 L 원가*</th>
@@ -1276,6 +1286,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
           <td>HA 1 MDa <em>(기준)</em></td>
           <td>19.4 mg/mL</td>
           <td>16.5 mg/mL</td><td>~2 %</td>
+          <td><strong>0.964</strong> <span style="font-size:0.72rem;color:#0d9488;">&gt; 0.95 ✓</span></td>
           <td>✅ 완전 용해</td>
           <td>1×</td>
           <td>~8,250 원</td>
@@ -1285,6 +1296,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
           <td>글리세린</td>
           <td>517 mg/mL</td>
           <td><strong>440 mg/mL</strong></td><td>40 % w/w</td>
+          <td><strong>0.957</strong> <span style="font-size:0.72rem;color:#0d9488;">&gt; 0.95 ✓</span></td>
           <td><span style="color:#15803d;font-weight:700;">✅ 완전 혼화</span><br>
             <span style="font-size:0.72rem;color:#64748b;">물과 어떤 비율로도 혼합</span></td>
           <td><span class="exp-badge fail">27×</span></td>
@@ -1296,6 +1308,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
           <td>PG</td>
           <td>453 mg/mL</td>
           <td><strong>385 mg/mL</strong></td><td>37.6 % w/w</td>
+          <td><strong>0.957</strong> <span style="font-size:0.72rem;color:#0d9488;">&gt; 0.95 ✓</span></td>
           <td><span style="color:#15803d;font-weight:700;">✅ 완전 혼화</span></td>
           <td><span class="exp-badge fail">23×</span></td>
           <td>~770 원</td>
@@ -1306,6 +1319,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
           <td>부틸렌 글리콜</td>
           <td>473 mg/mL</td>
           <td><strong>402 mg/mL</strong></td><td>39.4 % w/w</td>
+          <td><strong>0.957</strong> <span style="font-size:0.72rem;color:#0d9488;">&gt; 0.95 ✓</span></td>
           <td><span style="color:#15803d;font-weight:700;">✅ 완전 혼화</span></td>
           <td><span class="exp-badge fail">24×</span></td>
           <td>~3,220 원</td>
