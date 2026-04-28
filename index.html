@@ -1078,7 +1078,12 @@ input[type=range].ha-range { accent-color: #0d9488; }
 
   <!-- ── 실험 계획서 ─────────────────────────────── -->
   <div class="panel exp-panel">
-    <div class="section-title">🧪 실험 계획서 — 잔류 평형 부피 85% 유지 증명 (증발률 ≤ 15%)</div>
+    <details id="exp-details">
+    <summary style="list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;user-select:none;">
+      <span id="exp-arrow" style="font-size:0.7rem;color:#7c3aed;transition:transform 0.2s;display:inline-block;">▶</span>
+      <span class="section-title" style="margin-bottom:0;">🧪 실험 계획서 — 잔류 평형 부피 85% 유지 증명 (증발률 ≤ 15%)</span>
+    </summary>
+    <div style="margin-top:14px;">
 
     <p class="exp-intro">
       히알루론산(HA) 용액을 실리콘 아이패치 위에 마이크로피펫으로 1.5 μL 분주한 후,
@@ -1216,6 +1221,8 @@ input[type=range].ha-range { accent-color: #0d9488; }
       상온 조건이므로 별도 항온항습 챔버 없이 일반 실험실에서 수행 가능.
     </div>
 
+    </div><!-- end details-body -->
+    </details>
   </div><!-- end exp-panel -->
 
   <!-- ── HA 대체 보습제 비교 ──────────────────────── -->
@@ -2204,6 +2211,15 @@ function setDefaultCup() {
 
 // HA 슬라이더
 link('c0');
+
+// 실험계획서 드롭다운 화살표
+const expDetails = document.getElementById('exp-details');
+const expArrow   = document.getElementById('exp-arrow');
+if (expDetails && expArrow) {
+  expDetails.addEventListener('toggle', () => {
+    expArrow.style.transform = expDetails.open ? 'rotate(90deg)' : 'rotate(0deg)';
+  });
+}
 
 // MW 버튼
 document.querySelectorAll('.mw-btn').forEach(btn => {
