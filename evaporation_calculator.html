@@ -1,0 +1,2232 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>실리콘 컵 물 증발 시뮬레이터</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.134.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f1f5f9;
+  color: #1e293b;
+  min-height: 100vh;
+}
+
+header {
+  background: #1e40af;
+  color: white;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+header h1 { font-size: 1.1rem; font-weight: 700; }
+header .sub { font-size: 0.8rem; opacity: 0.7; margin-top: 2px; }
+.author-tag {
+  font-size: 0.72rem;
+  opacity: 0.65;
+  margin-top: 3px;
+  letter-spacing: 0.02em;
+}
+.badge {
+  margin-left: auto;
+  font-size: 0.72rem;
+  background: rgba(255,255,255,0.18);
+  padding: 3px 10px;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+main {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 14px;
+  padding: 14px;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.panel {
+  background: white;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  margin-bottom: 14px;
+}
+
+.control-group { margin-bottom: 14px; }
+.control-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+.ctrl-label { font-size: 0.84rem; font-weight: 500; color: #334155; }
+.ctrl-right { display: flex; align-items: center; gap: 4px; }
+.ctrl-right input[type=number] {
+  width: 62px;
+  padding: 2px 6px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.84rem;
+  text-align: right;
+  color: #1e293b;
+}
+.ctrl-right input[type=number]:focus { outline: 2px solid #3b82f6; border-color: transparent; }
+.ctrl-unit { font-size: 0.75rem; color: #94a3b8; }
+
+input[type=range] {
+  width: 100%;
+  height: 5px;
+  border-radius: 3px;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+.divider { border: none; border-top: 1px solid #f1f5f9; margin: 14px 0; }
+
+/* Cup diagram */
+.cup-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0 14px;
+}
+
+/* Fixed info */
+.fixed-row {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.7;
+}
+.fixed-row strong { color: #334155; }
+
+/* Formula box */
+.formula-box {
+  margin-top: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.formula-box summary {
+  padding: 7px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  background: #f8fafc;
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.formula-box summary::before {
+  content: '▶';
+  font-size: 0.65rem;
+  transition: transform 0.2s;
+}
+.formula-box[open] summary::before { transform: rotate(90deg); }
+.formula-inner {
+  padding: 12px;
+  background: #fafafa;
+  font-size: 0.76rem;
+  line-height: 1.9;
+  color: #334155;
+}
+.formula-inner .eq {
+  font-family: 'Consolas', 'Courier New', monospace;
+  background: #f1f5f9;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin: 4px 0;
+  display: block;
+  color: #1e40af;
+  font-size: 0.78rem;
+}
+.formula-inner .val-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 12px;
+  margin: 6px 0;
+}
+.formula-inner .val { color: #0f766e; font-family: monospace; }
+.formula-inner .lbl { color: #64748b; }
+.formula-section { margin-top: 10px; font-weight: 700; color: #475569; font-size: 0.75rem; }
+
+.model-note {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin-top: 10px;
+}
+
+/* Warning */
+.warn-box {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 0.78rem;
+  color: #9a3412;
+  margin-top: 8px;
+  display: none;
+}
+
+/* Metrics */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.metric-card {
+  background: #eff6ff;
+  border-radius: 10px;
+  padding: 11px 13px;
+}
+.metric-card.amber { background: #fffbeb; }
+.metric-card.teal  { background: #f0fdfa; }
+.metric-label { font-size: 0.71rem; font-weight: 600; color: #3b82f6; margin-bottom: 3px; }
+.metric-card.amber .metric-label { color: #d97706; }
+.metric-card.teal  .metric-label { color: #0d9488; }
+.metric-value { font-size: 1.3rem; font-weight: 800; color: #1d4ed8; line-height: 1.1; }
+.metric-card.amber .metric-value { color: #b45309; }
+.metric-card.teal  .metric-value { color: #0f766e; }
+.metric-unit { font-size: 0.72rem; color: #60a5fa; font-weight: 500; }
+.metric-card.amber .metric-unit { color: #fbbf24; }
+.metric-card.teal  .metric-unit { color: #2dd4bf; }
+
+.metric-pct {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #0d9488;
+  margin-top: 3px;
+  letter-spacing: 0.02em;
+}
+
+/* HA section */
+.ha-section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #0d9488;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 12px;
+}
+.ha-section-title input[type=checkbox] { accent-color: #0d9488; cursor: pointer; width: 14px; height: 14px; }
+.ha-section-title label { cursor: pointer; }
+
+input[type=range].ha-range { accent-color: #0d9488; }
+
+/* MW buttons */
+.mw-buttons { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.mw-btn {
+  padding: 4px 10px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #475569;
+  transition: all 0.15s;
+}
+.mw-btn:hover { border-color: #0d9488; color: #0d9488; }
+.mw-btn.active { background: #0d9488; color: white; border-color: #0d9488; }
+
+/* HA formula section divider */
+.ha-formula-divider {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 8px;
+  margin-top: 8px;
+  color: #0d9488 !important;
+}
+.formula-inner .eq.teal { color: #0f766e; background: #f0fdfa; }
+.formula-inner .val.teal { color: #0d9488; }
+
+/* Chart section label */
+.chart-section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #3b82f6;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #eff6ff;
+}
+.chart-section-label.teal {
+  color: #0d9488;
+  border-bottom-color: #f0fdfa;
+}
+
+/* Chart */
+.chart-wrap { position: relative; height: 280px; }
+.ha-chart-wrap { height: 240px; margin-top: 10px; }
+
+/* Download button */
+.dl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  padding: 5px 14px;
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #86efac;
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.dl-btn:hover { background: #dcfce7; }
+
+/* Experiment plan panel */
+.exp-panel { grid-column: 1 / -1; }
+.exp-intro {
+  font-size: 0.875rem; color: #475569; line-height: 1.65;
+  margin-bottom: 18px; padding: 10px 14px;
+  background: #fdf4ff; border-left: 3px solid #9333ea;
+  border-radius: 0 8px 8px 0;
+}
+.exp-sub {
+  font-size: 0.88rem; font-weight: 700; color: #7c3aed;
+  margin: 18px 0 8px; padding-bottom: 5px;
+  border-bottom: 1px solid #e9d5ff;
+}
+.exp-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 12px; }
+.exp-table th {
+  text-align: left; padding: 6px 10px;
+  background: #f5f3ff; font-weight: 700; font-size: 0.76rem;
+  color: #6d28d9; text-transform: uppercase; letter-spacing: 0.04em;
+  border-bottom: 1px solid #ddd6fe;
+}
+.exp-table td { padding: 7px 10px; border-bottom: 1px solid #f3f4f6; }
+.exp-table tr:last-child td { border-bottom: none; }
+.exp-table tr.target-row td { font-weight: 700; background: #fdf4ff; }
+.exp-table tr.ctrl-row td { color: #6b7280; }
+.exp-badge {
+  display: inline-block; padding: 1px 6px; border-radius: 4px;
+  font-size: 0.75rem; font-weight: 700;
+}
+.exp-badge.pass { background: #dcfce7; color: #15803d; }
+.exp-badge.fail { background: #fef9c3; color: #92400e; }
+.exp-badge.ctrl { background: #f1f5f9; color: #64748b; }
+.exp-steps { margin: 0; padding-left: 0; list-style: none; }
+.exp-steps li {
+  display: flex; gap: 10px; align-items: flex-start;
+  margin-bottom: 8px; font-size: 0.84rem; line-height: 1.6;
+}
+.exp-step-n {
+  flex-shrink: 0; min-width: 22px; height: 22px;
+  background: #7c3aed; color: #fff; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 700; margin-top: 1px;
+}
+.exp-note {
+  margin-top: 8px; padding: 8px 12px; background: #eff6ff;
+  border-radius: 7px; font-size: 0.80rem; color: #1d4ed8;
+}
+.exp-success {
+  margin-top: 10px; padding: 10px 14px; background: #f0fdf4;
+  border: 1px solid #86efac; border-radius: 8px;
+  font-size: 0.84rem; color: #15803d; font-weight: 600;
+}
+.exp-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 4px; }
+@media (max-width: 700px) { .exp-grid2 { grid-template-columns: 1fr; } }
+.exp-box {
+  background: #f8fafc; border: 1px solid #e2e8f0;
+  border-radius: 8px; padding: 12px 14px;
+}
+.exp-box-title { font-size: 0.80rem; font-weight: 700; color: #334155; margin-bottom: 6px; }
+.exp-box ul { margin: 0; padding-left: 14px; font-size: 0.80rem; color: #475569; line-height: 1.75; }
+
+/* Explanation panel */
+.explain-panel { grid-column: 1 / -1; }
+.explain-intro {
+  font-size: 0.875rem;
+  color: #475569;
+  line-height: 1.65;
+  margin-bottom: 18px;
+  padding: 10px 14px;
+  background: #f0fdfa;
+  border-left: 3px solid #0d9488;
+  border-radius: 0 8px 8px 0;
+}
+.explain-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.explain-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+.explain-card-head {
+  padding: 10px 14px 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.explain-card-head.blue  { background: #1d4ed8; }
+.explain-card-head.teal  { background: #0d9488; }
+.explain-card-head.amber { background: #b45309; }
+.explain-illus {
+  background: #f8fafc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 14px 8px 10px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.explain-body {
+  padding: 12px 14px;
+  font-size: 0.82rem;
+  color: #374151;
+  line-height: 1.75;
+}
+.explain-body strong { color: #1e293b; }
+.explain-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 5px 0;
+  font-size: 0.81rem;
+}
+.step-num {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #fff;
+  margin-top: 1px;
+}
+.step-num.blue  { background: #2563eb; }
+.step-num.teal  { background: #0d9488; }
+.step-num.amber { background: #d97706; }
+.explain-formula-row {
+  margin: 10px 14px;
+  padding: 7px 11px;
+  background: #f1f5f9;
+  border-radius: 7px;
+  font-family: 'Consolas', monospace;
+  font-size: 0.78rem;
+  color: #1e40af;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+}
+.key-badge {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.80rem;
+}
+.key-badge.up   { background: #dcfce7; color: #15803d; }
+.key-badge.down { background: #fef9c3; color: #92400e; }
+
+@media (max-width: 860px) {
+  main { grid-template-columns: 1fr; }
+  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  .explain-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>실리콘 컵 물 증발 시뮬레이터</h1>
+    <div class="sub">Stefan 확산 + 원뿔대 기하학 · HA 농도 효과 모델</div>
+    <div class="author-tag">작성: 안재환</div>
+  </div>
+  <span class="badge">무풍 · 실리콘 표면</span>
+</header>
+
+<main>
+
+  <!-- ── 왼쪽: 컨트롤 패널 ──────────────────────── -->
+  <div class="panel">
+    <div class="section-title">환경 조건</div>
+
+    <div class="control-group">
+      <div class="control-row">
+        <span class="ctrl-label">온도 T</span>
+        <div class="ctrl-right">
+          <input type="number" id="T-n" value="25" min="5" max="50" step="1">
+          <span class="ctrl-unit">°C</span>
+        </div>
+      </div>
+      <input type="range" id="T-r" min="5" max="50" step="1" value="25">
+    </div>
+
+    <div class="control-group">
+      <div class="control-row">
+        <span class="ctrl-label">상대 습도 RH</span>
+        <div class="ctrl-right">
+          <input type="number" id="RH-n" value="50" min="0" max="95" step="1">
+          <span class="ctrl-unit">%</span>
+        </div>
+      </div>
+      <input type="range" id="RH-r" min="0" max="95" step="1" value="50">
+    </div>
+
+    <hr class="divider">
+    <div class="section-title">컵 기하학</div>
+
+    <div class="cup-wrap">
+      <canvas id="cup-3d" style="border-radius:8px;display:block;"></canvas>
+    </div>
+
+    <div class="control-group">
+      <div class="control-row">
+        <span class="ctrl-label">바닥 반지름 r<sub>bot</sub></span>
+        <div class="ctrl-right">
+          <input type="number" id="rbot-n" value="0.5" min="0.1" max="3" step="0.1">
+          <span class="ctrl-unit">mm</span>
+        </div>
+      </div>
+      <input type="range" id="rbot-r" min="0.1" max="3" step="0.1" value="0.5">
+    </div>
+
+    <div class="control-group">
+      <div class="control-row">
+        <span class="ctrl-label">입구 반지름 r<sub>top</sub></span>
+        <div class="ctrl-right">
+          <input type="number" id="rtop-n" value="1.5" min="0.1" max="5" step="0.1">
+          <span class="ctrl-unit">mm</span>
+        </div>
+      </div>
+      <input type="range" id="rtop-r" min="0.1" max="5" step="0.1" value="1.5">
+    </div>
+
+    <div class="control-group">
+      <div class="control-row">
+        <span class="ctrl-label">컵 높이 H</span>
+        <div class="ctrl-right">
+          <input type="number" id="H-n" value="3" min="0.5" max="10" step="0.5">
+          <span class="ctrl-unit">mm</span>
+        </div>
+      </div>
+      <input type="range" id="H-r" min="0.5" max="10" step="0.5" value="3">
+    </div>
+
+    <div class="control-group">
+      <div class="control-row">
+        <span class="ctrl-label">초기 부피 V₀</span>
+        <div class="ctrl-right">
+          <input type="number" id="V0-n" value="1.5" min="0.1" max="50" step="0.1">
+          <span class="ctrl-unit">μL</span>
+        </div>
+      </div>
+      <input type="range" id="V0-r" min="0.1" max="50" step="0.1" value="1.5">
+    </div>
+
+    <div class="warn-box" id="warn-vol">⚠ V₀가 컵 최대 용량을 초과합니다.</div>
+
+    <hr class="divider">
+
+    <div class="fixed-row">
+      표면: <strong>실리콘 (PDMS)</strong> &nbsp;·&nbsp; 기류: <strong>없음</strong><br>
+      외부 확산 보정: <strong>λ = π·r<sub>top</sub>/4</strong>
+    </div>
+
+    <!-- 계산식 패널 -->
+    <details class="formula-box" id="formula-box">
+      <summary>계산식 &amp; 현재 값</summary>
+      <div class="formula-inner">
+        <div class="formula-section">▸ 해석해 (Stefan 1D 확산)</div>
+        <code class="eq">h(t) = (H+λ) − √[(H+λ−h₀)² + K·t]</code>
+        <code class="eq">K = 2·D(T)·Δc / ρ</code>
+        <code class="eq">V(h) = π[r<sub>b</sub>²h + r<sub>b</sub>·Δr/H·h² + Δr²/(3H²)·h³]</code>
+
+        <div class="formula-section" style="margin-top:8px">▸ 완전 증발 시간</div>
+        <code class="eq">τ = ρ·h₀·(H+λ − h₀/2) / (D·Δc)</code>
+
+        <div class="formula-section" style="margin-top:8px">▸ 현재 값</div>
+        <div class="val-row">
+          <span class="lbl">D(T)</span><span class="val" id="f-D">—</span>
+          <span class="lbl">c<sub>sat</sub></span><span class="val" id="f-cs">—</span>
+          <span class="lbl">Δc</span><span class="val" id="f-dc">—</span>
+          <span class="lbl">λ</span><span class="val" id="f-lam">—</span>
+          <span class="lbl">h₀</span><span class="val" id="f-h0">—</span>
+          <span class="lbl">K</span><span class="val" id="f-K">—</span>
+          <span class="lbl">α = H+λ−h₀</span><span class="val" id="f-al">—</span>
+          <span class="lbl">τ</span><span class="val" id="f-tau">—</span>
+        </div>
+
+        <!-- HA 공식 섹션 -->
+        <div id="ha-formula-section" style="display:none;">
+          <div class="formula-section ha-formula-divider">▸ 히알루론산 (HA) 모델</div>
+          <code class="eq teal">a_w(c) = exp(−k₂·c²) &nbsp;[c: mg/mL]</code>
+          <code class="eq teal">c_HA(t) = c₀·V₀ / V(t)</code>
+          <code class="eq teal">평형: c_eq = √(−ln(RH) / k₂)</code>
+          <div class="val-row" style="margin-top:6px;">
+            <span class="lbl">MW</span><span class="val teal" id="f-mw">—</span>
+            <span class="lbl">k₂</span><span class="val teal" id="f-k2">—</span>
+            <span class="lbl">a_w (초기)</span><span class="val teal" id="f-aw0">—</span>
+            <span class="lbl">c_eq</span><span class="val teal" id="f-ceq">—</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <p class="model-note">
+      이상적 Stefan 확산 모델. 증발 냉각·stick-slip 미포함 → 실제 대비 ±15% 오차 가능.
+    </p>
+
+    <!-- ── HA 섹션 ─────────────────────────────── -->
+    <hr class="divider">
+    <div class="ha-section-title">
+      <span>히알루론산 (HA) 시뮬레이션</span>
+    </div>
+
+    <div id="ha-controls">
+      <div class="control-group">
+        <div class="control-row">
+          <span class="ctrl-label">초기 HA 농도 c₀</span>
+          <div class="ctrl-right">
+            <input type="number" id="c0-n" value="5" min="0.1" max="50" step="0.1">
+            <span class="ctrl-unit">mg/mL</span>
+          </div>
+        </div>
+        <input type="range" id="c0-r" min="0.1" max="50" step="0.1" value="5" class="ha-range">
+      </div>
+
+      <div class="control-group">
+        <div class="ctrl-label" style="margin-bottom:7px;">분자량 (MW)</div>
+        <div class="mw-buttons">
+          <button class="mw-btn" data-mw="50k">50 kDa</button>
+          <button class="mw-btn" data-mw="100k">100 kDa</button>
+          <button class="mw-btn" data-mw="500k">500 kDa</button>
+          <button class="mw-btn active" data-mw="1M">1 MDa</button>
+          <button class="mw-btn" data-mw="2M">2 MDa</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 오른쪽: 그래프 패널 ─────────────────────── -->
+  <div class="panel">
+
+    <!-- 순수물 메트릭 -->
+    <div class="chart-section-label">순수물 (H₂O)</div>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">초기 증발 속도</div>
+        <div class="metric-value" id="rate-v">—</div>
+        <div class="metric-unit">μL/min</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">완전 증발 시간 τ</div>
+        <div class="metric-value" id="tau-v">—</div>
+        <div class="metric-unit" id="tau-u">—</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">초기 수면 높이</div>
+        <div class="metric-value" id="h0-v">—</div>
+        <div class="metric-unit">mm</div>
+      </div>
+      <div class="metric-card amber">
+        <div class="metric-label">70% 증발 도달 시간</div>
+        <div class="metric-value" id="t70-v">—</div>
+        <div class="metric-unit" id="t70-u">—</div>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-water"></canvas>
+    </div>
+    <button class="dl-btn" onclick="downloadXlsx('water')">⬇ xlsx 다운로드 (순수물)</button>
+
+    <!-- HA 그래프 섹션 (토글) -->
+    <div id="ha-section" style="display:none;">
+      <div class="chart-section-label teal" style="margin-top:16px;">히알루론산 (HA) 용액</div>
+      <div class="metrics-grid" id="ha-metrics">
+        <div class="metric-card teal">
+          <div class="metric-label">HA 종료 시간</div>
+          <div class="metric-value" id="ha-tau-v">—</div>
+          <div class="metric-unit" id="ha-tau-u">—</div>
+        </div>
+        <div class="metric-card teal">
+          <div class="metric-label">잔류 평형 부피</div>
+          <div class="metric-value" id="ha-veq-v">—</div>
+          <div class="metric-unit">μL</div>
+          <div class="metric-pct" id="ha-veq-pct"></div>
+        </div>
+        <div class="metric-card teal">
+          <div class="metric-label">최종 HA 농도</div>
+          <div class="metric-value" id="ha-cf-v">—</div>
+          <div class="metric-unit">mg/mL</div>
+        </div>
+        <div class="metric-card teal">
+          <div class="metric-label">순수물 대비 배수</div>
+          <div class="metric-value" id="ha-ratio-v">—</div>
+          <div class="metric-unit" id="ha-ratio-u">×</div>
+        </div>
+      </div>
+      <div class="chart-wrap ha-chart-wrap">
+        <canvas id="chart-ha"></canvas>
+      </div>
+      <button class="dl-btn" onclick="downloadXlsx('ha')">⬇ xlsx 다운로드 (HA)</button>
+    </div>
+
+  </div>
+
+  <!-- ── 원리 설명 패널 ─────────────────────────── -->
+  <div class="panel explain-panel">
+    <div class="section-title">💡 원리 설명 — 왜 이런 결과가 나올까?</div>
+    <p class="explain-intro">
+      히알루론산(HA)은 피부에도 들어있는 물질로, 물 분자를 강하게 붙잡는 성질이 있어요.
+      아래 세 가지 개념을 이해하면 시뮬레이터 결과가 왜 그렇게 나오는지 알 수 있어요.
+    </p>
+    <div class="explain-grid">
+
+      <!-- ── 카드 1: HA가 물을 잡는다 ── -->
+      <div class="explain-card">
+        <div class="explain-card-head blue">🧲 HA는 물 분자를 잡아두는 그물망</div>
+        <div class="explain-illus">
+          <svg width="200" height="115" viewBox="0 0 200 115" xmlns="http://www.w3.org/2000/svg">
+            <!-- 비커 -->
+            <rect x="18" y="18" width="164" height="88" rx="4" fill="#eff6ff" stroke="#94a3b8" stroke-width="1.4"/>
+            <rect x="18" y="58" width="164" height="48" fill="#bfdbfe" opacity="0.55" rx="3"/>
+            <!-- 수면선 -->
+            <line x1="18" y1="58" x2="182" y2="58" stroke="#2563eb" stroke-width="1.2" stroke-dasharray="4,2"/>
+            <!-- HA 사슬 1 (초록 파선) -->
+            <path d="M28 76 Q42 64 56 76 Q70 88 84 76 Q98 64 112 76 Q126 88 140 76 Q154 64 168 76"
+                  fill="none" stroke="#0d9488" stroke-width="3" stroke-linecap="round"/>
+            <!-- HA 사슬 2 -->
+            <path d="M28 96 Q42 87 56 96 Q70 105 84 96 Q98 87 112 96 Q126 105 140 96"
+                  fill="none" stroke="#0d9488" stroke-width="2.2" stroke-linecap="round" opacity="0.65"/>
+            <!-- 물 분자 (HA에 붙잡힘) -->
+            <circle cx="44" cy="72" r="5" fill="#3b82f6" opacity="0.8"/>
+            <circle cx="70" cy="81" r="5" fill="#3b82f6" opacity="0.8"/>
+            <circle cx="98" cy="72" r="5" fill="#3b82f6" opacity="0.8"/>
+            <circle cx="126" cy="81" r="5" fill="#3b82f6" opacity="0.8"/>
+            <circle cx="154" cy="72" r="5" fill="#3b82f6" opacity="0.8"/>
+            <circle cx="56" cy="99" r="4" fill="#3b82f6" opacity="0.7"/>
+            <circle cx="112" cy="99" r="4" fill="#3b82f6" opacity="0.7"/>
+            <!-- 공기 중 수증기 (적음) -->
+            <circle cx="70" cy="38" r="3.5" fill="#93c5fd" opacity="0.5"/>
+            <circle cx="130" cy="34" r="3" fill="#93c5fd" opacity="0.4"/>
+            <!-- 증발 화살표 (약함) -->
+            <line x1="72" y1="33" x2="72" y2="20" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3,2"/>
+            <polygon points="72,19 69,25 75,25" fill="#94a3b8"/>
+            <!-- 레이블 -->
+            <text x="26" y="14" font-size="9.5" fill="#0d9488" font-weight="700">HA 사슬</text>
+            <text x="80" y="14" font-size="9.5" fill="#1d4ed8" font-weight="700">H₂O</text>
+            <text x="140" y="14" font-size="9" fill="#64748b">증발↓(억제)</text>
+            <line x1="42" y1="13" x2="55" y2="70" stroke="#0d9488" stroke-width="0.8" stroke-dasharray="2,2" opacity="0.5"/>
+            <line x1="84" y1="13" x2="70" y2="75" stroke="#1d4ed8" stroke-width="0.8" stroke-dasharray="2,2" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="explain-body">
+          <div class="explain-step">
+            <span class="step-num blue">1</span>
+            <span>HA는 긴 사슬 모양 분자. 물 분자를 주변에 <strong>붙잡는 성질</strong>이 있어요 (수소결합).</span>
+          </div>
+          <div class="explain-step">
+            <span class="step-num blue">2</span>
+            <span>붙잡힌 물은 공기 중으로 <strong>날아가기 어려워요</strong> — 증발이 억제돼요.</span>
+          </div>
+          <div class="explain-step">
+            <span class="step-num blue">3</span>
+            <span>이 "잡아두는 힘"을 <strong>수분 활성도(a_w)</strong>라고 해요. a_w가 낮을수록 증발이 적어요.</span>
+          </div>
+        </div>
+        <div class="explain-formula-row">a_w = exp(−k₂ · c²) &nbsp;&nbsp; [c: 농도 mg/mL]</div>
+        <div style="padding:8px 14px 12px; font-size:0.78rem; color:#64748b;">
+          📌 비유: 설탕이 많이 녹은 시럽은 순수한 물보다 훨씬 천천히 마르는 것과 같은 원리!
+        </div>
+      </div>
+
+      <!-- ── 카드 2: 농도 ↑ → 잔류 부피 ↑ ── -->
+      <div class="explain-card">
+        <div class="explain-card-head teal">📈 농도 높을수록 → 잔류 부피 ↑</div>
+        <div class="explain-illus">
+          <svg width="200" height="115" viewBox="0 0 200 115" xmlns="http://www.w3.org/2000/svg">
+            <!-- 왼쪽 비커: 저농도 -->
+            <rect x="10" y="22" width="80" height="84" rx="3" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.2"/>
+            <rect x="10" y="55" width="80" height="51" fill="#bfdbfe" opacity="0.45" rx="2"/>
+            <text x="28" y="18" font-size="9" fill="#64748b" font-weight="600">저농도 (c₀ 낮음)</text>
+            <!-- HA 1개 -->
+            <path d="M18 80 Q30 72 42 80 Q54 88 66 80 Q78 72 84 76"
+                  fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round"/>
+            <!-- 증발 많이 (화살표 굵음) -->
+            <line x1="30" y1="48" x2="30" y2="28" stroke="#3b82f6" stroke-width="1.8"/>
+            <polygon points="30,26 27,33 33,33" fill="#3b82f6"/>
+            <line x1="50" y1="44" x2="50" y2="24" stroke="#3b82f6" stroke-width="1.8"/>
+            <polygon points="50,22 47,29 53,29" fill="#3b82f6"/>
+            <line x1="70" y1="48" x2="70" y2="28" stroke="#3b82f6" stroke-width="1.8"/>
+            <polygon points="70,26 67,33 73,33" fill="#3b82f6"/>
+            <!-- 잔류 부피 작음 표시 -->
+            <rect x="10" y="86" width="80" height="20" fill="#dbeafe" opacity="0.8" rx="2"/>
+            <text x="22" y="100" font-size="8.5" fill="#1d4ed8" font-weight="700">잔류 V: 작음 ↓</text>
+
+            <!-- 오른쪽 비커: 고농도 -->
+            <rect x="110" y="22" width="80" height="84" rx="3" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.2"/>
+            <rect x="110" y="40" width="80" height="66" fill="#bfdbfe" opacity="0.65" rx="2"/>
+            <text x="120" y="18" font-size="9" fill="#0d9488" font-weight="600">고농도 (c₀ 높음)</text>
+            <!-- HA 3개 -->
+            <path d="M116 58 Q125 51 134 58 Q143 65 152 58 Q161 51 170 58 Q179 65 184 61"
+                  fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round"/>
+            <path d="M116 74 Q125 67 134 74 Q143 81 152 74 Q161 67 170 74 Q179 81 184 77"
+                  fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round"/>
+            <path d="M116 90 Q127 84 138 90 Q149 96 160 90 Q171 84 184 90"
+                  fill="none" stroke="#0d9488" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/>
+            <!-- 증발 거의 없음 -->
+            <line x1="150" y1="36" x2="150" y2="26" stroke="#3b82f6" stroke-width="1" stroke-dasharray="2,2"/>
+            <polygon points="150,24 148,29 152,29" fill="#3b82f6" opacity="0.4"/>
+            <!-- 잔류 부피 크다 -->
+            <rect x="110" y="74" width="80" height="32" fill="#a7f3d0" opacity="0.6" rx="2"/>
+            <text x="122" y="94" font-size="8.5" fill="#065f46" font-weight="700">잔류 V: 큼 ↑</text>
+          </svg>
+        </div>
+        <div class="explain-body">
+          <div class="explain-step">
+            <span class="step-num teal">1</span>
+            <span>HA 농도 ↑ = 그물망이 <strong>더 촘촘</strong> = 물을 더 강하게 붙잡음.</span>
+          </div>
+          <div class="explain-step">
+            <span class="step-num teal">2</span>
+            <span>증발이 멈추는 <strong>평형 농도 c_eq</strong>는 RH와 MW로만 결정돼요 (초기 농도와 무관).</span>
+          </div>
+          <div class="explain-step">
+            <span class="step-num teal">3</span>
+            <span>c₀가 높으면 c_eq에 도달할 때 <strong>더 많은 물이 남아요</strong>.</span>
+          </div>
+        </div>
+        <div class="explain-formula-row">V_eq = V₀ × (c₀ / c_eq) &nbsp; → &nbsp; c₀ 2배 = V_eq 2배</div>
+        <div style="padding:8px 14px 12px; font-size:0.78rem; color:#64748b;">
+          📌 비유: 소금을 많이 녣은 물(고농도)은 같은 습도에서 더 적게 마르는 것과 같은 원리!
+        </div>
+      </div>
+
+      <!-- ── 카드 3: 분자량 ↓ → 잔류 부피 ↑ ── -->
+      <div class="explain-card">
+        <div class="explain-card-head amber">⚖️ 분자량 작을수록 → 잔류 부피 ↑</div>
+        <div class="explain-illus">
+          <svg width="200" height="115" viewBox="0 0 200 115" xmlns="http://www.w3.org/2000/svg">
+            <!-- 저울 받침 -->
+            <line x1="100" y1="60" x2="100" y2="105" stroke="#475569" stroke-width="2.5"/>
+            <line x1="60" y1="108" x2="140" y2="108" stroke="#475569" stroke-width="2.5"/>
+            <!-- 저울 막대 (기울어짐: 오른쪽=저분자량이 더 강함) -->
+            <line x1="20" y1="52" x2="180" y2="68" stroke="#b45309" stroke-width="2.5"/>
+            <!-- 저울 끈 -->
+            <line x1="35" y1="52" x2="35" y2="66" stroke="#94a3b8" stroke-width="1.2"/>
+            <line x1="165" y1="68" x2="165" y2="82" stroke="#94a3b8" stroke-width="1.2"/>
+
+            <!-- 왼쪽 접시: 고분자량 (1 MDa) — 분자 1개 크다 -->
+            <ellipse cx="35" cy="72" rx="26" ry="7" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/>
+            <!-- 큰 분자 하나 -->
+            <ellipse cx="35" cy="56" rx="20" ry="11" fill="#d1fae5" stroke="#0d9488" stroke-width="1.5"/>
+            <text x="26" y="60" font-size="8.5" fill="#0d9488" font-weight="700">HA</text>
+            <!-- 물 분자 (적음) -->
+            <circle cx="14" cy="52" r="3.5" fill="#3b82f6" opacity="0.65"/>
+            <circle cx="56" cy="52" r="3.5" fill="#3b82f6" opacity="0.65"/>
+            <text x="14" y="88" font-size="8" fill="#64748b" text-anchor="middle">1 MDa</text>
+            <text x="14" y="98" font-size="7.5" fill="#64748b" text-anchor="middle">분자 1개</text>
+            <text x="14" y="108" font-size="7.5" fill="#b45309" text-anchor="middle">붙잡기 약</text>
+
+            <!-- 오른쪽 접시: 저분자량 (50 kDa) — 분자 여러 개 -->
+            <ellipse cx="165" cy="88" rx="26" ry="7" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/>
+            <!-- 작은 분자 여러 개 -->
+            <circle cx="150" cy="70" r="7" fill="#d1fae5" stroke="#0d9488" stroke-width="1.2"/>
+            <circle cx="165" cy="66" r="7" fill="#d1fae5" stroke="#0d9488" stroke-width="1.2"/>
+            <circle cx="180" cy="70" r="7" fill="#d1fae5" stroke="#0d9488" stroke-width="1.2"/>
+            <circle cx="157" cy="80" r="7" fill="#d1fae5" stroke="#0d9488" stroke-width="1.2"/>
+            <circle cx="173" cy="80" r="7" fill="#d1fae5" stroke="#0d9488" stroke-width="1.2"/>
+            <!-- 물 분자 (많음) -->
+            <circle cx="140" cy="70" r="3.5" fill="#3b82f6" opacity="0.8"/>
+            <circle cx="143" cy="83" r="3.5" fill="#3b82f6" opacity="0.8"/>
+            <circle cx="187" cy="68" r="3.5" fill="#3b82f6" opacity="0.8"/>
+            <circle cx="187" cy="82" r="3.5" fill="#3b82f6" opacity="0.8"/>
+            <text x="186" y="103" font-size="8" fill="#64748b" text-anchor="middle">50 kDa</text>
+            <text x="186" y="112" font-size="7.5" fill="#065f46" text-anchor="middle">붙잡기 강</text>
+
+            <!-- 제목 -->
+            <text x="100" y="12" font-size="9" fill="#64748b" text-anchor="middle">같은 무게(mg/mL) — 분자량만 다르다면?</text>
+          </svg>
+        </div>
+        <div class="explain-body">
+          <div class="explain-step">
+            <span class="step-num amber">1</span>
+            <span><strong>같은 무게</strong>(mg/mL)라도 분자량이 작으면 <strong>분자 수가 더 많아요</strong>.<br>
+            예: 50 kDa는 1 MDa보다 <span class="key-badge down">20배 많은 분자</span></span>
+          </div>
+          <div class="explain-step">
+            <span class="step-num amber">2</span>
+            <span>물을 붙잡는 힘(삼투압)은 분자 <strong>무게</strong>가 아니라 <strong>개수</strong>에 비례해요.</span>
+          </div>
+          <div class="explain-step">
+            <span class="step-num amber">3</span>
+            <span>분자 수 ↑ → 삼투압 ↑ → k₂ ↑ → <strong>평형 농도 c_eq ↓</strong> → <span class="key-badge up">잔류 부피 ↑</span></span>
+          </div>
+        </div>
+        <div class="explain-formula-row">c_eq = √(−ln(RH) / k₂) &nbsp; → &nbsp; k₂↑이면 c_eq↓, V_eq↑</div>
+        <div style="padding:8px 14px 12px; font-size:0.78rem; color:#64748b;">
+          📌 비유: 각설탕 1개 vs 가루설탕 20개 — 같은 무게라도 가루가 물에서 삼투압이 더 강해요!
+        </div>
+      </div>
+
+    </div><!-- end HA explain-grid -->
+
+    <!-- ── 순수물 원리 설명 ─────────────────────── -->
+    <div style="margin-top:24px; margin-bottom:12px; font-size:0.92rem; font-weight:700; color:#1e40af; padding-bottom:8px; border-bottom:2px solid #dbeafe;">
+      💧 순수물(H₂O)은 어떻게 증발할까?
+    </div>
+    <p class="explain-intro" style="border-left-color:#2563eb; background:#eff6ff;">
+      HA 없이 순수한 물만 있을 때, 증발을 결정하는 세 가지 핵심 원리를 알아봐요.
+      온도·습도·컵 모양이 어떻게 증발 속도를 바꾸는지 그림으로 확인해보세요.
+    </p>
+    <div class="explain-grid">
+
+      <!-- 카드 A: 분자 탈출 -->
+      <div class="explain-card">
+        <div class="explain-card-head blue">🏃 물 분자는 표면에서 공기 속으로 탈출한다</div>
+        <div class="explain-illus">
+          <svg width="200" height="115" viewBox="0 0 200 115" xmlns="http://www.w3.org/2000/svg">
+            <!-- 물 -->
+            <rect x="20" y="60" width="160" height="46" rx="3" fill="#bfdbfe" opacity="0.7"/>
+            <!-- 수면선 -->
+            <line x1="20" y1="60" x2="180" y2="60" stroke="#2563eb" stroke-width="1.5"/>
+            <!-- 탈출 분자들 (위로 올라가는 화살표) -->
+            <circle cx="60"  cy="52" r="5" fill="#3b82f6" opacity="0.9"/>
+            <line x1="60" y1="46" x2="60" y2="28" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arr)"/>
+            <circle cx="100" cy="48" r="5" fill="#3b82f6" opacity="0.9"/>
+            <line x1="100" y1="42" x2="100" y2="18" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arr)"/>
+            <circle cx="140" cy="54" r="5" fill="#3b82f6" opacity="0.9"/>
+            <line x1="140" y1="48" x2="140" y2="30" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arr)"/>
+            <!-- 수면 위 물 분자들 (느리게 움직임) -->
+            <circle cx="45"  cy="78" r="4" fill="#93c5fd"/>
+            <circle cx="75"  cy="88" r="4" fill="#93c5fd"/>
+            <circle cx="110" cy="74" r="4" fill="#93c5fd"/>
+            <circle cx="150" cy="84" r="4" fill="#93c5fd"/>
+            <!-- arrow defs -->
+            <defs>
+              <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 z" fill="#2563eb"/>
+              </marker>
+            </defs>
+            <text x="100" y="12" font-size="8.5" fill="#64748b" text-anchor="middle">에너지가 충분한 분자만 탈출!</text>
+          </svg>
+        </div>
+        <div class="explain-body">
+          <div class="explain-step">
+            <span class="step-num blue">1</span>
+            <span>물은 액체지만 표면의 분자들은 <strong>끊임없이 진동</strong>하고 있어요.</span>
+          </div>
+          <div class="explain-step">
+            <span class="step-num blue">2</span>
+            <span>충분한 에너지를 가진 분자는 수면 위로 <strong>튀어나가</strong> 기체(수증기)가 됩니다.</span>
+          </div>
+          <div class="explain-step">
+            <span class="step-num blue">3</span>
+            <span><strong>온도가 높을수록</strong> 에너지 큰 분자 수 ↑ → 탈출 속도 ↑ → <span class="key-badge up">증발 빨라짐</span></span>
+          </div>
+        </div>
+        <div class="explain-formula-row">증발 속도 ∝ D(T) × Δc &nbsp;→&nbsp; 온도↑ 이면 D↑, Δc↑</div>
+        <div style="padding:8px 14px 12px; font-size:0.78rem; color:#64748b;">
+          📌 비유: 통통 튀는 공처럼, 온도가 높으면 공이 더 세게 튀어 울타리(수면)를 넘을 수 있어요.
+        </div>
+      </div>
+
+      <!-- 카드 B: Stefan 공기 기둥 -->
+      <div class="explain-card">
+        <div class="explain-card-head teal">🌬 탈출한 분자는 공기 기둥을 통해 퍼져나간다</div>
+        <div class="explain-illus">
+          <svg width="200" height="115" viewBox="0 0 200 115" xmlns="http://www.w3.org/2000/svg">
+            <!-- 컵 외벽 -->
+            <rect x="55" y="10" width="90" height="95" rx="4" fill="none" stroke="#94a3b8" stroke-width="1.8"/>
+            <!-- 물 -->
+            <rect x="56" y="68" width="88" height="36" fill="#bfdbfe" opacity="0.65"/>
+            <!-- 공기 기둥 (화살표 여러개) -->
+            <line x1="80"  y1="65" x2="80"  y2="18" stroke="#0d9488" stroke-width="1.4" stroke-dasharray="3,2" marker-end="url(#arrT)"/>
+            <line x1="100" y1="65" x2="100" y2="12" stroke="#0d9488" stroke-width="1.4" stroke-dasharray="3,2" marker-end="url(#arrT)"/>
+            <line x1="120" y1="65" x2="120" y2="18" stroke="#0d9488" stroke-width="1.4" stroke-dasharray="3,2" marker-end="url(#arrT)"/>
+            <!-- 수면선 -->
+            <line x1="56" y1="68" x2="144" y2="68" stroke="#2563eb" stroke-width="1.5"/>
+            <!-- Leff 화살표 -->
+            <line x1="147" y1="10" x2="147" y2="68" stroke="#f59e0b" stroke-width="1.5"/>
+            <line x1="143" y1="10" x2="151" y2="10" stroke="#f59e0b" stroke-width="1.2"/>
+            <line x1="143" y1="68" x2="151" y2="68" stroke="#f59e0b" stroke-width="1.2"/>
+            <text x="158" y="42" font-size="9" fill="#b45309" transform="rotate(90,158,42)">L_eff</text>
+            <defs>
+              <marker id="arrT" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 z" fill="#0d9488"/>
+              </marker>
+            </defs>
+            <text x="100" y="107" font-size="8.5" fill="#64748b" text-anchor="middle">수면이 낮아질수록 L_eff ↑ → 속도↓</text>
+          </svg>
+        </div>
+        <div class="explain-body">
+          <div class="explain-step">
+            <span class="step-num teal">1</span>
+            <span>탈출한 수증기 분자는 컵 위 <strong>공기 기둥</strong>을 통해 바깥으로 <strong>확산</strong>돼요.</span>
+          </div>
+          <div class="explain-step">
+            <span class="step-num teal">2</span>
+            <span>물이 줄어들면 수면이 낮아지고 공기 기둥(L_eff)이 <strong>길어져요</strong>.</span>
+          </div>
+          <div class="explain-step">
+            <span class="step-num teal">3</span>
+            <span>기둥이 길면 확산이 느려지므로 <strong>증발 속도가 점점 감소</strong>합니다. → <span class="key-badge down">그래프 기울기 완만</span></span>
+          </div>
+        </div>
+        <div class="explain-formula-row">dV/dt ∝ 1/L_eff &nbsp;→&nbsp; 수위↓ 이면 L_eff↑, 속도↓</div>
+        <div style="padding:8px 14px 12px; font-size:0.78rem; color:#64748b;">
+          📌 비유: 빨대가 길수록 음료를 빨아올리기 어려운 것처럼, 공기 기둥이 길면 증발도 느려져요.
+        </div>
+      </div>
+
+      <!-- 카드 C: 상대 습도 -->
+      <div class="explain-card">
+        <div class="explain-card-head amber">💨 공기가 건조할수록 증발은 빨라진다</div>
+        <div class="explain-illus">
+          <svg width="200" height="115" viewBox="0 0 200 115" xmlns="http://www.w3.org/2000/svg">
+            <!-- 왼쪽: 건조 (RH 낮음) -->
+            <rect x="10" y="30" width="80" height="76" rx="4" fill="#fef9c3" opacity="0.6" stroke="#d97706" stroke-width="1"/>
+            <text x="50" y="22" font-size="8.5" fill="#92400e" text-anchor="middle">건조 (RH 낮음)</text>
+            <!-- 물 -->
+            <rect x="11" y="80" width="78" height="25" fill="#bfdbfe" opacity="0.7"/>
+            <line x1="11" y1="80" x2="89" y2="80" stroke="#2563eb" stroke-width="1.2"/>
+            <!-- 빠른 화살표들 -->
+            <line x1="30" y1="76" x2="30" y2="42" stroke="#2563eb" stroke-width="1.8" marker-end="url(#arrB)"/>
+            <line x1="50" y1="76" x2="50" y2="36" stroke="#2563eb" stroke-width="1.8" marker-end="url(#arrB)"/>
+            <line x1="70" y1="76" x2="70" y2="42" stroke="#2563eb" stroke-width="1.8" marker-end="url(#arrB)"/>
+            <text x="50" y="110" font-size="8" fill="#92400e" text-anchor="middle">Δc 크다 → 빠름</text>
+
+            <!-- 오른쪽: 습함 (RH 높음) -->
+            <rect x="110" y="30" width="80" height="76" rx="4" fill="#e0f2fe" opacity="0.6" stroke="#0284c7" stroke-width="1"/>
+            <text x="150" y="22" font-size="8.5" fill="#0369a1" text-anchor="middle">습함 (RH 높음)</text>
+            <!-- 물 -->
+            <rect x="111" y="80" width="78" height="25" fill="#bfdbfe" opacity="0.7"/>
+            <line x1="111" y1="80" x2="189" y2="80" stroke="#2563eb" stroke-width="1.2"/>
+            <!-- 느린 화살표들 -->
+            <line x1="130" y1="76" x2="130" y2="62" stroke="#93c5fd" stroke-width="1.2" marker-end="url(#arrS)"/>
+            <line x1="150" y1="76" x2="150" y2="56" stroke="#93c5fd" stroke-width="1.2" marker-end="url(#arrS)"/>
+            <line x1="170" y1="76" x2="170" y2="62" stroke="#93c5fd" stroke-width="1.2" marker-end="url(#arrS)"/>
+            <!-- 공중 수증기 표시 -->
+            <circle cx="125" cy="50" r="3" fill="#93c5fd" opacity="0.6"/>
+            <circle cx="145" cy="45" r="3" fill="#93c5fd" opacity="0.6"/>
+            <circle cx="165" cy="50" r="3" fill="#93c5fd" opacity="0.6"/>
+            <text x="150" y="110" font-size="8" fill="#0369a1" text-anchor="middle">Δc 작다 → 느림</text>
+            <defs>
+              <marker id="arrB" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 z" fill="#2563eb"/>
+              </marker>
+              <marker id="arrS" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 z" fill="#93c5fd"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+        <div class="explain-body">
+          <div class="explain-step">
+            <span class="step-num amber">1</span>
+            <span>공기 중엔 이미 일부 수증기가 있어요. 이걸 <strong>상대 습도(RH)</strong>라고 해요.</span>
+          </div>
+          <div class="explain-step">
+            <span class="step-num amber">2</span>
+            <span>증발 속도는 수면(c_sat)과 공기(RH×c_sat)의 <strong>농도 차이(Δc)</strong>에 비례해요.</span>
+          </div>
+          <div class="explain-step">
+            <span class="step-num amber">3</span>
+            <span>습도 높으면 Δc ↓ → 증발 느림. 건조하면 Δc ↑ → <span class="key-badge up">증발 빠름</span></span>
+          </div>
+        </div>
+        <div class="explain-formula-row">Δc = c_sat × (1 − RH) &nbsp;→&nbsp; RH↑ 이면 Δc↓, 속도↓</div>
+        <div style="padding:8px 14px 12px; font-size:0.78rem; color:#64748b;">
+          📌 비유: 이미 향기가 가득한 방에선 향초가 잘 안 날아가듯, 습한 공기엔 수증기가 추가로 들어갈 공간이 좁아요.
+        </div>
+      </div>
+
+    </div><!-- end water explain-grid -->
+  </div>
+
+  <!-- ── 실험 계획서 ─────────────────────────────── -->
+  <div class="panel exp-panel">
+    <div class="section-title">🧪 실험 계획서 — 잔류 평형 부피 85% 유지 증명 (증발률 ≤ 15%)</div>
+
+    <p class="exp-intro">
+      히알루론산(HA) 용액을 실리콘 아이패치 위에 마이크로피펫으로 1.5 μL 분주한 후,
+      증발이 멈춘 시점의 잔류 부피(V<sub>eq</sub>)가 초기 부피 대비 <strong>≥ 85%</strong>
+      <span style="color:#be123c;font-weight:700;">(= 증발률 ≤ 15%)</span> 임을 실험적으로 검증한다.
+      시뮬레이터(Stefan 확산 + HA 수분 활성도 모델) 예측값과 실측값을 대조하여 모델을 함께 검증한다.
+    </p>
+
+    <!-- 이론 예측 -->
+    <div class="exp-sub">① 이론적 예측 (시뮬레이터, RH = 95 %, T = 25 °C)</div>
+    <p style="font-size:0.80rem;color:#64748b;margin-bottom:8px;">
+      평형 농도 c<sub>eq</sub> = √(−ln(RH) / k₂),&nbsp;&nbsp;
+      잔류 비율 V<sub>eq</sub>/V₀ = c₀ / c<sub>eq</sub>
+    </p>
+    <table class="exp-table">
+      <thead><tr>
+        <th>그룹</th><th>재료</th><th>c₀ (mg/mL)</th>
+        <th>c<sub>eq</sub> (mg/mL)</th><th>예측 V<sub>eq</sub>/V₀</th><th>목적</th>
+      </tr></thead>
+      <tbody>
+        <tr class="ctrl-row">
+          <td>CTL</td><td>탈이온수</td><td>—</td><td>—</td>
+          <td><span class="exp-badge ctrl">~0 %</span></td><td>음성 대조군 (완전 증발)</td>
+        </tr>
+        <tr>
+          <td>G-Sub</td><td>1 MDa HA</td><td>8.0</td><td>19.4</td>
+          <td><span class="exp-badge fail">~41 %</span></td><td>미달 비교군</td>
+        </tr>
+        <tr class="target-row">
+          <td>G-Target</td><td>1 MDa HA</td><td>16.5</td><td>19.4</td>
+          <td><span class="exp-badge pass">≥ 85 %</span></td><td>목표 조건 ★</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="exp-note">
+      세 그룹 모두 초기 수분 활성도 a<sub>w,init</sub> &gt; RH 이므로 증발이 시작됨.
+      질량 변화 예측: 1.500 mg → 1.275 mg (△ 225 μg). &nbsp;n = 5 per group, 총 15 샘플.
+    </div>
+
+    <!-- 재료/장비 -->
+    <div class="exp-sub">② 재료 및 장비</div>
+    <div class="exp-grid2">
+      <div class="exp-box">
+        <div class="exp-box-title">재료</div>
+        <ul>
+          <li>1 MDa 히알루론산 분말 (분자량 인증서 포함)</li>
+          <li>탈이온수 (18.2 MΩ·cm)</li>
+          <li>실리콘 아이패치 (표면 균일, 세척·건조된 것)</li>
+        </ul>
+      </div>
+      <div class="exp-box">
+        <div class="exp-box-title">장비</div>
+        <ul>
+          <li>항온항습 챔버 (±0.1 °C, ±0.5 % RH)</li>
+          <li>마이크로밸런스 (분해능 1 μg)</li>
+          <li>마이크로피펫 0.5–2 μL (교정됨)</li>
+          <li>데이터로거 (1 min 간격 자동 기록)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 프로토콜 -->
+    <div class="exp-sub">③ 실험 프로토콜</div>
+    <ul class="exp-steps">
+      <li><span class="exp-step-n">1</span>
+        <span><strong>[전날 준비]</strong> 1 MDa HA를 탈이온수에 용해해 8.0 mg/mL (G-Sub) 및 16.5 mg/mL (G-Target) 스톡 제조 → 4 °C 12 h 이상 보관하여 완전 용해.</span>
+      </li>
+      <li><span class="exp-step-n">2</span>
+        <span><strong>[아이패치 전처리]</strong> 실리콘 아이패치를 에탄올 → 탈이온수 3회 세척 후 60 °C 오븐 건조 1 h. 챔버 내부에서 24 h 이상 보관하여 표면 흡착 평형화.</span>
+      </li>
+      <li><span class="exp-step-n">3</span>
+        <span><strong>[챔버 안정화]</strong> T = 25 °C, RH = 95 % 설정 후 최소 2 h 대기. 챔버 내 온습도 센서로 조건 확인.</span>
+      </li>
+      <li><span class="exp-step-n">4</span>
+        <span><strong>[기준 질량 기록]</strong> 아이패치를 마이크로밸런스 위에 올려 기준 질량 m<sub>patch</sub> 기록.</span>
+      </li>
+      <li><span class="exp-step-n">5</span>
+        <span><strong>[분주]</strong> 교정된 마이크로피펫으로 아이패치 표면 중앙에 1.500 μL 분주 → 즉시 질량 측정 = m₀. (m₀ − m<sub>patch</sub> = 1.50 ± 0.02 mg 확인)</span>
+      </li>
+      <li><span class="exp-step-n">6</span>
+        <span><strong>[연속 모니터링]</strong> 챔버 밀폐 후 데이터로거로 1 min 간격 질량 기록, 최대 48 h.</span>
+      </li>
+      <li><span class="exp-step-n">7</span>
+        <span><strong>[평형 판정]</strong> 연속 30 min 동안 질량 변화율 &lt; 0.5 μg/min → 평형 도달. 평형 질량 m<sub>eq</sub> 기록.</span>
+      </li>
+    </ul>
+
+    <!-- 분석 -->
+    <div class="exp-sub">④ 데이터 분석</div>
+    <table class="exp-table">
+      <thead><tr><th>항목</th><th>계산식</th><th>방법</th></tr></thead>
+      <tbody>
+        <tr><td>잔류 부피 비율</td>
+          <td>V<sub>eq</sub>/V₀ = (m<sub>eq</sub> − m<sub>patch</sub>) / (m₀ − m<sub>patch</sub>) × 100 %</td>
+          <td>각 샘플별</td></tr>
+        <tr><td>그룹 간 비교</td>
+          <td>One-way ANOVA + Tukey post-hoc</td>
+          <td>CTL vs G-Sub vs G-Target</td></tr>
+        <tr><td>85 % 달성 검증</td>
+          <td>One-sample t-test (H₁: μ ≥ 85 %, α = 0.05)</td>
+          <td>G-Target만</td></tr>
+        <tr><td>모델 검증</td>
+          <td>예측값 vs 실측값 선형 회귀, r² ≥ 0.85 목표</td>
+          <td>전 그룹 대조</td></tr>
+      </tbody>
+    </table>
+
+    <!-- 성공 기준 & 일정 -->
+    <div class="exp-sub">⑤ 성공 기준 및 일정</div>
+    <div class="exp-grid2">
+      <div class="exp-box">
+        <div class="exp-box-title">성공 기준</div>
+        <ul>
+          <li>G-Target: V<sub>eq</sub>/V₀ ≥ 85 %, p &lt; 0.05 ✓</li>
+          <li>G-Sub: V<sub>eq</sub>/V₀ &lt; 85 % (대비 확인)</li>
+          <li>CTL: V<sub>eq</sub>/V₀ ≈ 0 % (HA 효과 인과성)</li>
+          <li>시뮬레이터 대비 r² ≥ 0.85</li>
+        </ul>
+      </div>
+      <div class="exp-box">
+        <div class="exp-box-title">일정 (2주)</div>
+        <ul>
+          <li><strong>1주차:</strong> HA 용액 제조 / 아이패치 전처리 / 챔버 캘리브레이션</li>
+          <li><strong>2주차:</strong> 본 실험 (15 샘플 연속 측정) / 데이터 분석 / 시뮬레이터 대조</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-success">
+      ★ G-Target (1 MDa HA, 16.5 mg/mL, RH 95 %, T 25 °C) 에서 V<sub>eq</sub>/V₀ ≥ 85 %
+      <span style="font-weight:400;">(= 증발된 부피 ≤ 15%)</span> 확인 시 목표 달성.
+      순수물 대비와 저농도 그룹이 각각 음성·비교 대조를 제공하여 HA 농도 임계값의 인과관계를 통계적으로 입증.
+    </div>
+
+  </div><!-- end exp-panel -->
+
+  <!-- ── HA 대체 보습제 비교 ──────────────────────── -->
+  <div class="panel exp-panel">
+    <div class="section-title">🔄 HA 대체 보습제 비교 — 잔류 평형 부피 계산</div>
+
+    <p class="exp-intro" style="border-left-color:#7c3aed; background:#fdf4ff;">
+      글리세린·PG·부틸렌 글리콜은 상온 액체 상태의 저가 화장품 성분으로 HA의 대체 후보입니다.
+      소분자 보습제의 수분 활성도 데이터(Crapiste 1986, 문헌 추정)를 이용해
+      각 성분의 평형 농도(c<sub>eq</sub>)와 잔류 부피 비율(V<sub>eq</sub>/V₀)을 계산했습니다.
+      <br><br>
+      <strong>모델:</strong> 수분 활성도 a<sub>w</sub>(c)가 RH에 도달하면 증발 정지.
+      V<sub>eq</sub>/V₀ = c₀ / c<sub>eq</sub> &nbsp;(c₀ &lt; c<sub>eq</sub> 인 경우)
+    </p>
+
+    <!-- 대체 성분 기본 정보 -->
+    <div class="exp-sub">① 대체 성분 목록 (상온 액체 · 저가 화장품 성분)</div>
+    <table class="exp-table">
+      <thead><tr>
+        <th>성분</th><th>분자량</th><th>OH기</th><th>상태 (25 °C)</th>
+        <th>원가 (bulk)</th><th>주요 용도</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>글리세린</strong> (Glycerin)</td>
+          <td>92 g/mol</td><td>3개</td><td>✅ 액체 (점성)</td>
+          <td>~1,500 원/kg</td><td>범용 보습, 최다 사용</td>
+        </tr>
+        <tr>
+          <td><strong>프로필렌 글리콜</strong> (PG)</td>
+          <td>76 g/mol</td><td>2개</td><td>✅ 액체</td>
+          <td>~2,000 원/kg</td><td>용매 겸 보습</td>
+        </tr>
+        <tr>
+          <td><strong>부틸렌 글리콜</strong> (1,3-BG)</td>
+          <td>90 g/mol</td><td>2개</td><td>✅ 액체</td>
+          <td>~8,000 원/kg</td><td>한국·일본 화장품 주력</td>
+        </tr>
+        <tr style="background:#f0fdf4;">
+          <td><strong>HA (1 MDa)</strong> <em>기준</em></td>
+          <td>~1,000,000 g/mol</td><td>폴리머</td><td>✅ 수용액 액체</td>
+          <td>~400,000 원/kg</td><td>고급 보습, 점도 부여</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 핵심 비교: c_eq 및 85% 조건 -->
+    <div class="exp-sub">② 평형 농도 c<sub>eq</sub> 및 85% 달성 조건 (RH = 95 %, T = 25 °C)</div>
+    <p style="font-size:0.79rem;color:#64748b;margin-bottom:8px;">
+      c<sub>eq</sub> : 증발이 멈추는 농도. &nbsp; V<sub>eq</sub>/V₀ = c₀/c<sub>eq</sub>
+    </p>
+    <table class="exp-table">
+      <thead><tr>
+        <th>성분</th>
+        <th>c<sub>eq</sub> (mg/mL)</th>
+        <th>85 % 달성 c₀</th>
+        <th>% w/w</th>
+        <th>용해도</th>
+        <th>HA 대비 필요량</th>
+        <th>1 L 원가*</th>
+        <th>HA 대비 가격</th>
+      </tr></thead>
+      <tbody>
+        <tr style="background:#f0fdf4; font-weight:700;">
+          <td>HA 1 MDa <em>(기준)</em></td>
+          <td>19.4 mg/mL</td>
+          <td>16.5 mg/mL</td><td>~2 %</td>
+          <td>✅ 완전 용해</td>
+          <td>1×</td>
+          <td>~8,250 원</td>
+          <td>기준</td>
+        </tr>
+        <tr>
+          <td>글리세린</td>
+          <td>517 mg/mL</td>
+          <td><strong>440 mg/mL</strong></td><td>40 % w/w</td>
+          <td><span style="color:#15803d;font-weight:700;">✅ 완전 혼화</span><br>
+            <span style="font-size:0.72rem;color:#64748b;">물과 어떤 비율로도 혼합</span></td>
+          <td><span class="exp-badge fail">27×</span></td>
+          <td>~660 원</td>
+          <td><span class="exp-badge pass">12.5배 저렴</span><br>
+            <span style="font-size:0.72rem;">비용 92% 절감</span></td>
+        </tr>
+        <tr>
+          <td>PG</td>
+          <td>453 mg/mL</td>
+          <td><strong>385 mg/mL</strong></td><td>37.6 % w/w</td>
+          <td><span style="color:#15803d;font-weight:700;">✅ 완전 혼화</span></td>
+          <td><span class="exp-badge fail">23×</span></td>
+          <td>~770 원</td>
+          <td><span class="exp-badge pass">10.7배 저렴</span><br>
+            <span style="font-size:0.72rem;">비용 91% 절감</span></td>
+        </tr>
+        <tr>
+          <td>부틸렌 글리콜</td>
+          <td>473 mg/mL</td>
+          <td><strong>402 mg/mL</strong></td><td>39.4 % w/w</td>
+          <td><span style="color:#15803d;font-weight:700;">✅ 완전 혼화</span></td>
+          <td><span class="exp-badge fail">24×</span></td>
+          <td>~3,220 원</td>
+          <td><span class="exp-badge pass">2.6배 저렴</span><br>
+            <span style="font-size:0.72rem;">비용 61% 절감</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.75rem;color:#94a3b8;margin-bottom:14px;">
+      *bulk 추정가 기준 (HA ~500,000 원/kg, 글리세린 ~1,500 원/kg, PG ~2,000 원/kg, BG ~8,000 원/kg).
+      글리세린·PG·BG는 물과 <strong>완전 혼화(infinitely miscible)</strong> — 용해도 제한 없음.
+      제형 원가는 HA 대비 약 1/10 (글리세린), 1/11 (PG), 1/2.6 (BG) 수준이나,
+      40 % 이상 고농도 적용 시 끈적임·텍스처 문제가 발생할 수 있음.
+    </p>
+
+    <!-- V_eq/V₀ 대조표 -->
+    <div class="exp-sub">③ 농도별 V<sub>eq</sub>/V₀ 비교 (RH = 95 %, T = 25 °C)</div>
+    <table class="exp-table">
+      <thead><tr>
+        <th>초기 농도 c₀</th>
+        <th>HA 1 MDa</th>
+        <th>글리세린</th>
+        <th>PG</th>
+        <th>BG (1,3)</th>
+        <th>비고</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td>5 mg/mL</td>
+          <td>25.7 %</td><td>1.0 %</td><td>1.1 %</td><td>1.1 %</td>
+          <td>일반 HA 화장품 농도</td>
+        </tr>
+        <tr>
+          <td>10 mg/mL</td>
+          <td>51.5 %</td><td>1.9 %</td><td>2.2 %</td><td>2.1 %</td>
+          <td></td>
+        </tr>
+        <tr class="target-row">
+          <td><strong>16.5 mg/mL</strong></td>
+          <td><span class="exp-badge pass">85.0 %</span></td>
+          <td>3.2 %</td><td>3.6 %</td><td>3.5 %</td>
+          <td>← HA 85 % 달성 조건</td>
+        </tr>
+        <tr>
+          <td>100 mg/mL (10 %)</td>
+          <td><span class="exp-badge pass">100 %</span></td>
+          <td>19.3 %</td><td>22.1 %</td><td>21.1 %</td>
+          <td>글리세린 화장품 일반 농도</td>
+        </tr>
+        <tr>
+          <td>200 mg/mL (20 %)</td>
+          <td>100 %</td>
+          <td>38.7 %</td><td>44.2 %</td><td>42.3 %</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>300 mg/mL (30 %)</td>
+          <td>100 %</td>
+          <td>58.0 %</td><td>66.2 %</td><td>63.4 %</td>
+          <td></td>
+        </tr>
+        <tr class="target-row">
+          <td><strong>440 mg/mL (44 %)</strong></td>
+          <td>100 %</td>
+          <td><span class="exp-badge pass">85.1 %</span></td><td>97.1 %</td><td>93.0 %</td>
+          <td>← 글리세린/PG/BG 85 % 조건</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 해석 -->
+    <div class="exp-sub">④ 해석 및 결론</div>
+    <div class="exp-grid2">
+      <div class="exp-box">
+        <div class="exp-box-title">왜 HA가 소분자 대비 압도적인가?</div>
+        <ul>
+          <li>HA는 <strong>폴리머</strong> — 사슬 하나가 수천 개의 OH기 보유</li>
+          <li>물 분자를 <strong>그물망</strong>처럼 가두는 협동 결합 효과</li>
+          <li>같은 질량이라도 소분자보다 물 활성도를 훨씬 강하게 낮춤</li>
+          <li>소분자 보습제는 순수한 <strong>삼투압 효과</strong>에만 의존</li>
+        </ul>
+      </div>
+      <div class="exp-box">
+        <div class="exp-box-title">대체 사용 시 실무 고려사항</div>
+        <ul>
+          <li>글리세린 44 % 이상 → 매우 점성, 끈적한 텍스처</li>
+          <li>PG 40 % 이상 → 피부 자극 가능성 (농도 제한)</li>
+          <li>BG는 피부 자극 적으나 원가 상승</li>
+          <li>현실적 대안: <strong>저농도 HA + 글리세린 10~20 %</strong> 혼합 → 상호 보완</li>
+          <li>85 % 단독 달성은 소분자만으론 제형 제약 큼</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-success" style="background:#fdf4ff;border-color:#ddd6fe;color:#6d28d9;">
+      결론: HA 대체 성분들은 질량 기준 23–27배 더 필요하며, 제형 원가는 약 1/10 수준.
+      단독으로 85 % 달성 시 44 % 이상 고농도가 요구되어 텍스처·안전성 제약이 발생하므로,
+      <strong>HA와 글리세린/BG의 블렌딩</strong>이 비용·성능 균형에서 최적 전략임.
+    </div>
+
+  </div><!-- end alt-panel -->
+
+</main>
+
+<script>
+// ═══════════════════════════════════════════════
+// 물리 엔진 — 순수물
+// ═══════════════════════════════════════════════
+
+const RHO = 997;
+const RV  = 461.5;
+
+function D_water(T_K) {
+  return 2.42e-5 * Math.pow(T_K / 293, 1.5);
+}
+
+function c_sat(T_K) {
+  const t = T_K - 273.15;
+  const es = 611.2 * Math.exp(17.67 * t / (t + 243.5));
+  return es / (RV * T_K);
+}
+
+function cupVolume(h, rb, rt, H) {
+  const dr = rt - rb;
+  return Math.PI * (
+    rb * rb * h
+    + rb * (dr / H) * h * h
+    + (dr * dr / (3 * H * H)) * h * h * h
+  );
+}
+
+function cupRadius(h, rb, rt, H) {
+  return rb + (rt - rb) * h / H;
+}
+
+function findH0(V_target, rb, rt, H) {
+  if (V_target <= 0) return 0;
+  let lo = 0, hi = H;
+  for (let i = 0; i < 80; i++) {
+    const mid = (lo + hi) / 2;
+    cupVolume(mid, rb, rt, H) < V_target ? (lo = mid) : (hi = mid);
+  }
+  return (lo + hi) / 2;
+}
+
+function simulate(T_C, RH_pct, rb_mm, rt_mm, H_mm, V0_uL) {
+  const T_K = T_C + 273.15;
+  const RH  = RH_pct / 100;
+  const rb  = rb_mm * 1e-3;
+  const rt  = rt_mm * 1e-3;
+  const H   = H_mm  * 1e-3;
+
+  const Vmax  = cupVolume(H, rb, rt, H);
+  const V0_m3 = Math.min(V0_uL * 1e-9, Vmax);
+  const h0    = findH0(V0_m3, rb, rt, H);
+  const D     = D_water(T_K);
+  const cs    = c_sat(T_K);
+  const deltaC = cs * (1 - RH);
+  const lambda = Math.PI * rt / 4;
+  const alpha  = H + lambda - h0;
+  const K      = 2 * D * deltaC / RHO;
+
+  if (deltaC < 1e-12) {
+    return { times:[0,100], volumes:[V0_uL,V0_uL],
+             tangT:[0,100],  tangV:[V0_uL,V0_uL],
+             t70: null, V70: V0_uL * 0.3,
+             rate0:0, tau:Infinity, Vmax_uL:Vmax*1e9, h0_mm:h0*1e3,
+             D, cs, deltaC, lambda, alpha, K };
+  }
+
+  const tau_s = ((H + lambda) ** 2 - alpha * alpha) / K;
+
+  const V70_m3 = 0.3 * V0_m3;
+  const h70    = findH0(V70_m3, rb, rt, H);
+  const alpha70 = H + lambda - h70;
+  const t70_s  = (alpha70 * alpha70 - alpha * alpha) / K;
+
+  const N = 500;
+  const times   = new Array(N + 1);
+  const volumes = new Array(N + 1);
+  for (let i = 0; i <= N; i++) {
+    const t = (i / N) * tau_s;
+    const h = (H + lambda) - Math.sqrt(alpha * alpha + K * t);
+    times[i]   = t / 60;
+    volumes[i] = Math.max(0, cupVolume(Math.max(0, h), rb, rt, H) * 1e9);
+  }
+
+  const A0     = Math.PI * cupRadius(h0, rb, rt, H) ** 2;
+  const rate0  = A0 * D * deltaC / (RHO * alpha) * 1e9 * 60;
+  const tangDur = tau_s / 60 * 0.3;
+  const tangT  = [0, tangDur];
+  const tangV  = [V0_m3*1e9, Math.max(0, V0_m3*1e9 - rate0*tangDur)];
+
+  return {
+    times, volumes,
+    tangT, tangV,
+    t70: t70_s / 60,
+    V70: V70_m3 * 1e9,
+    rate0, tau: tau_s / 60,
+    Vmax_uL: Vmax * 1e9, h0_mm: h0 * 1e3,
+    D, cs, deltaC, lambda: lambda*1e3, alpha: alpha*1e3, K
+  };
+}
+
+// ═══════════════════════════════════════════════
+// 물리 엔진 — 히알루론산 (HA)
+// ═══════════════════════════════════════════════
+
+const HA_PARAMS = {
+  '50k':  { name: '50 kDa',  k2: 6.5e-4 },
+  '100k': { name: '100 kDa', k2: 4.3e-4 },
+  '500k': { name: '500 kDa', k2: 2.0e-4 },
+  '1M':   { name: '1 MDa',   k2: 1.36e-4 },
+  '2M':   { name: '2 MDa',   k2: 7.0e-5 },
+};
+
+function simulateHA(T_C, RH_pct, rb_mm, rt_mm, H_mm, V0_uL, c0_mgmL, mwKey, tau_w_min) {
+  const T_K = T_C + 273.15;
+  const RH  = RH_pct / 100;
+  const rb  = rb_mm * 1e-3;
+  const rt  = rt_mm * 1e-3;
+  const H   = H_mm  * 1e-3;
+
+  const { k2, name: mwName } = HA_PARAMS[mwKey];
+  const D      = D_water(T_K);
+  const cs     = c_sat(T_K);
+  const lambda = Math.PI * rt / 4;
+
+  const Vmax  = cupVolume(H, rb, rt, H);
+  const V0_m3 = Math.min(V0_uL * 1e-9, Vmax);
+  const h0    = findH0(V0_m3, rb, rt, H);
+
+  // 평형 농도: a_w(c_eq) = RH => c_eq = sqrt(-ln(RH)/k2)
+  const ln_RH  = (RH > 1e-9 && RH < 1) ? -Math.log(RH) : 0;
+  const c_eq   = ln_RH > 0 ? Math.sqrt(ln_RH / k2) : Infinity;
+
+  // 초기 수분 활성도
+  const a_w_init = Math.exp(-k2 * c0_mgmL * c0_mgmL);
+
+  // 이미 평형 상태인 경우
+  if (a_w_init <= RH + 1e-9) {
+    const t_end = (isFinite(tau_w_min) && tau_w_min > 0 ? tau_w_min : 60) * 1.05;
+    return {
+      times: [0, t_end], volumes: [V0_uL, V0_uL],
+      stopped: true, V_eq: V0_uL, c_final: c0_mgmL,
+      t_stop_min: 0, ratio: 0, k2, c_eq, a_w_init, mwName,
+    };
+  }
+
+  // 시간 스텝: 순수물 tau 기준 1500분할, 최대 30초
+  const tau_w_eff = (isFinite(tau_w_min) && tau_w_min > 0) ? tau_w_min : 60;
+  const dt_s = Math.min(tau_w_eff * 60 / 1500, 30);
+  const N_MAX = 4000;
+  const STORE_EVERY = 5;
+
+  let h        = h0;
+  let t_s      = 0;
+  let stopped  = false;
+  let V_eq     = null;
+  let c_final  = c0_mgmL;
+  let t_stop_min = null;
+  let done     = false;
+
+  const times   = [0];
+  const volumes = [V0_uL];
+
+  for (let i = 0; i < N_MAX && !done; i++) {
+    const V_m3 = cupVolume(h, rb, rt, H);
+    const V_uL = Math.max(V_m3 * 1e9, 1e-12);
+
+    // 현재 HA 농도 (질량 보존)
+    const c_HA = c0_mgmL * V0_uL / V_uL;
+
+    // 수분 활성도 & 유효 구동력
+    const a_w        = Math.exp(-k2 * c_HA * c_HA);
+    const deltaC_eff = cs * (a_w - RH);
+
+    // 평형 감지: deltaC_eff < 0.1% 또는 c_HA가 c_eq의 99.9%에 도달
+    const nearEq = deltaC_eff <= 1e-18
+      || (isFinite(c_eq) && c_HA >= c_eq * 0.999);
+    if (nearEq) {
+      stopped    = true;
+      V_eq       = V_m3 * 1e9;
+      c_final    = c_HA;
+      t_stop_min = t_s / 60;
+      times.push(t_s / 60);
+      volumes.push(V_eq);
+      done = true;
+      break;
+    }
+
+    const L_eff = (H - h) + lambda;
+    if (L_eff <= 1e-12) { done = true; break; }
+
+    // dh/dt = -D·Δc_eff / (ρ·L_eff)
+    const dh_dt = -D * deltaC_eff / (RHO * L_eff);
+    h   += dh_dt * dt_s;
+    t_s += dt_s;
+
+    if (h <= 0) {
+      h       = 0;
+      c_final = Infinity;
+      t_stop_min = t_s / 60;
+      times.push(t_s / 60);
+      volumes.push(0);
+      done = true;
+      break;
+    }
+
+    if ((i + 1) % STORE_EVERY === 0) {
+      const V_new = cupVolume(h, rb, rt, H) * 1e9;
+      times.push(t_s / 60);
+      volumes.push(Math.max(0, V_new));
+      c_final = c0_mgmL * V0_uL / Math.max(V_new, 1e-10);
+    }
+  }
+
+  // 루프 다 돌았을 때 마지막 포인트 보장
+  if (!done) {
+    t_stop_min = t_s / 60;
+    times.push(t_s / 60);
+    volumes.push(Math.max(0, cupVolume(h, rb, rt, H) * 1e9));
+  }
+
+  // 평형 상태면 차트 끝까지 수평선 연장
+  if (stopped && V_eq !== null) {
+    const t_end = Math.max(tau_w_eff * 1.05, t_stop_min * 1.1);
+    if (times[times.length - 1] < t_end) {
+      times.push(t_end);
+      volumes.push(V_eq);
+    }
+  }
+
+  const ratio = (isFinite(tau_w_min) && tau_w_min > 0 && t_stop_min !== null)
+    ? t_stop_min / tau_w_min : null;
+
+  return {
+    times, volumes,
+    stopped,
+    V_eq: stopped ? V_eq : null,
+    c_final: isFinite(c_final) ? c_final : null,
+    t_stop_min,
+    ratio,
+    k2, c_eq, a_w_init, mwName,
+  };
+}
+
+// ═══════════════════════════════════════════════
+// 차트
+// ═══════════════════════════════════════════════
+
+let waterChart = null;
+let haChart    = null;
+
+// ── 공통 annotation 헬퍼 ──────────────────────
+function makeAnnotationPlugin(fillColor, strokeColor, textColor) {
+  return {
+    id: 'annotPlugin_' + Math.random(),
+    afterDraw(chart) {
+      const ann = chart._ann;
+      if (!ann) return;
+      const { ctx, scales: { x: xS, y: yS } } = chart;
+      const px = xS.getPixelForValue(ann.x);
+      const py = yS.getPixelForValue(ann.y);
+      ctx.save();
+      ctx.font = 'bold 11px sans-serif';
+      const tw = ctx.measureText(ann.label).width;
+      ctx.fillStyle = fillColor;
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = 1;
+      const lx = px + 8, ly = py - 22;
+      ctx.beginPath();
+      ctx.roundRect(lx - 4, ly - 13, tw + 10, 18, 4);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = textColor;
+      ctx.fillText(ann.label, lx + 1, ly);
+      ctx.restore();
+    }
+  };
+}
+
+const waterAnnotPlugin = makeAnnotationPlugin('rgba(255,251,235,0.92)', '#f59e0b', '#b45309');
+const haAnnotPlugin    = makeAnnotationPlugin('rgba(240,253,250,0.92)', '#0d9488', '#0f766e');
+
+// ── 공통 x축 tick 포맷 ────────────────────────
+function xTick(v) {
+  const u = window._tauUnit || 'min';
+  if (u === 'hr')  return (v/60).toFixed(1) + 'h';
+  if (u === 'day') return (v/1440).toFixed(2) + 'd';
+  return v.toFixed(0) + 'm';
+}
+function xTitle() {
+  const u = window._tauUnit || 'min';
+  return u === 'hr' ? '시간 (hr)' : u === 'day' ? '시간 (day)' : '시간 (분)';
+}
+function xTooltip(v) {
+  const u = window._tauUnit || 'min';
+  return u === 'hr'  ? (v/60).toFixed(2) + ' hr'
+       : u === 'day' ? (v/1440).toFixed(3) + ' day'
+       : v.toFixed(1) + ' min';
+}
+
+function makeChartOptions(yLabel) {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 150 },
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: { font: { size: 11 }, filter: item => !item.text.startsWith('_') }
+      },
+      tooltip: {
+        callbacks: {
+          title: items => `시간: ${xTooltip(items[0].parsed.x)}`,
+          label: c => `${c.dataset.label}: ${c.parsed.y.toFixed(5)} μL`
+        }
+      }
+    },
+    scales: {
+      x: {
+        type: 'linear',
+        title: { display: true, text: '시간 (분)', font: { size: 11 } },
+        min: 0,
+        ticks: { callback: xTick }
+      },
+      y: {
+        title: { display: true, text: yLabel, font: { size: 11 } },
+        min: 0
+      }
+    }
+  };
+}
+
+function initCharts() {
+  // ── 순수물 차트 ────────────────────────────
+  const ctxW = document.getElementById('chart-water').getContext('2d');
+  waterChart = new Chart(ctxW, {
+    type: 'line',
+    plugins: [waterAnnotPlugin],
+    data: {
+      datasets: [
+        { label: '순수물 V(t)',   data: [], borderColor: '#2563eb',
+          backgroundColor: 'rgba(37,99,235,0.07)', borderWidth: 2.5,
+          pointRadius: 0, fill: true, tension: 0.3, order: 4 },
+        { label: '초기 기울기',   data: [], borderColor: '#ef4444',
+          borderDash: [7,5], borderWidth: 2, pointRadius: 0, fill: false, order: 3 },
+        { label: '70% 증발 시점', data: [], borderColor: '#f59e0b',
+          borderDash: [5,4], borderWidth: 1.8, pointRadius: 0, fill: false, order: 2 },
+        { label: '_70h',          data: [], borderColor: '#f59e0b',
+          borderDash: [5,4], borderWidth: 1.8, pointRadius: 0, fill: false, order: 2 },
+        { label: '_70pt',         data: [], borderColor: '#f59e0b',
+          backgroundColor: '#f59e0b', pointRadius: 6, pointHoverRadius: 8,
+          showLine: false, order: 1 },
+      ]
+    },
+    options: makeChartOptions('부피 V (μL)')
+  });
+
+  // ── HA 차트 ────────────────────────────────
+  const ctxH = document.getElementById('chart-ha').getContext('2d');
+  haChart = new Chart(ctxH, {
+    type: 'line',
+    plugins: [haAnnotPlugin],
+    data: {
+      datasets: [
+        { label: 'HA V(t)',     data: [], borderColor: '#0d9488',
+          backgroundColor: 'rgba(13,148,136,0.08)', borderWidth: 2.5,
+          pointRadius: 0, fill: true, tension: 0.3, order: 2 },
+        { label: 'HA 평형 V_eq', data: [], borderColor: '#0d9488',
+          borderDash: [8,5], borderWidth: 1.8, pointRadius: 0,
+          fill: false, order: 1 },
+      ]
+    },
+    options: makeChartOptions('부피 V (μL)')
+  });
+}
+
+function refreshWaterChart(res, xMax) {
+  if (!res) return;
+  const ds = waterChart.data.datasets;
+
+  ds[0].data = res.times.map((t, i) => ({ x: t, y: res.volumes[i] }));
+  ds[1].data = res.tangT.map((t, i) => ({ x: t, y: res.tangV[i] }));
+
+  if (res.t70 !== null) {
+    const V0 = res.volumes[0];
+    ds[2].data = [{ x: res.t70, y: 0 }, { x: res.t70, y: V0 }];
+    ds[3].data = [{ x: 0, y: res.V70 }, { x: res.t70, y: res.V70 }];
+    ds[4].data = [{ x: res.t70, y: res.V70 }];
+    waterChart._ann = { x: res.t70, y: res.V70,
+      label: `70% 증발  ${xTooltip(res.t70)}` };
+  } else {
+    ds[2].data = []; ds[3].data = []; ds[4].data = [];
+    waterChart._ann = null;
+  }
+
+  waterChart.options.scales.x.max = xMax;
+  waterChart.options.scales.x.title.text = xTitle();
+  waterChart.update();
+}
+
+function refreshHAChart(resHA, xMax) {
+  if (!resHA) return;
+  const ds = haChart.data.datasets;
+
+  ds[0].data = resHA.times.map((t, i) => ({ x: t, y: resHA.volumes[i] }));
+
+  if (resHA.stopped && resHA.V_eq !== null) {
+    const tEnd = resHA.times[resHA.times.length - 1];
+    ds[1].data = [{ x: 0, y: resHA.V_eq }, { x: tEnd, y: resHA.V_eq }];
+    haChart._ann = { x: resHA.t_stop_min, y: resHA.V_eq,
+      label: `평형 도달  ${xTooltip(resHA.t_stop_min)}` };
+  } else {
+    ds[1].data = [];
+    haChart._ann = null;
+  }
+
+  haChart.options.scales.x.max = xMax;
+  haChart.options.scales.x.title.text = xTitle();
+  haChart.update();
+}
+
+// ═══════════════════════════════════════════════
+// 3D 컵 다이어그램 (Three.js)
+// ═══════════════════════════════════════════════
+
+let _cup3d = null;
+
+function init3DCup() {
+  const canvas = document.getElementById('cup-3d');
+  const W = 200, SH = 210;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xf8fafc);
+
+  const camera = new THREE.PerspectiveCamera(42, W / SH, 0.001, 10000);
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(W, SH);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.72));
+  const dLight = new THREE.DirectionalLight(0xffffff, 0.85);
+  dLight.position.set(8, 14, 10);
+  scene.add(dLight);
+  const fLight = new THREE.DirectionalLight(0x93c5fd, 0.28);
+  fLight.position.set(-6, 4, -4);
+  scene.add(fLight);
+
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping   = true;
+  controls.dampingFactor   = 0.06;
+  controls.autoRotate      = true;
+  controls.autoRotateSpeed = 1.3;
+
+  let meshes = [];
+  (function loop() {
+    requestAnimationFrame(loop);
+    controls.update();
+    renderer.render(scene, camera);
+  })();
+
+  _cup3d = {
+    scene, camera, controls,
+    clear() {
+      meshes.forEach(m => {
+        scene.remove(m);
+        m.geometry && m.geometry.dispose();
+        if (m.material) {
+          Array.isArray(m.material)
+            ? m.material.forEach(mt => mt.dispose())
+            : m.material.dispose();
+        }
+      });
+      meshes = [];
+    },
+    add(m) { meshes.push(m); scene.add(m); }
+  };
+}
+
+function drawCup(rb_mm, rt_mm, H_mm, h0_mm) {
+  if (!_cup3d) init3DCup();
+  const { clear, add, camera, controls } = _cup3d;
+  clear();
+
+  const rb  = rb_mm, rt = rt_mm, H = H_mm;
+  const h0  = Math.min(Math.max(h0_mm, 0), H);
+  const r_w = rb + (rt - rb) * (h0 / Math.max(H, 1e-9));
+  const SEG  = 64;
+  const maxR = Math.max(rt, rb);
+  const rimT = Math.max(H * 0.014, 0.04);
+
+  // 카메라 배치
+  const vd = Math.max(H, maxR * 2) * 3.8;
+  camera.position.set(vd * 0.62, H * 0.72, vd);
+  camera.lookAt(0, H * 0.42, 0);
+  controls.target.set(0, H * 0.42, 0);
+
+  // 측벽 (반투명 실리콘)
+  const wall = new THREE.Mesh(
+    new THREE.CylinderGeometry(rt, rb, H, SEG, 1, true),
+    new THREE.MeshPhysicalMaterial({
+      color: 0xdce8f2, transparent: true, opacity: 0.22,
+      roughness: 0.05, side: THREE.DoubleSide,
+    })
+  );
+  wall.position.y = H / 2;
+  add(wall);
+
+  // 상/하단 림
+  [{ y: 0, r: rb }, { y: H, r: rt }].forEach(({ y, r }) => {
+    const rim = new THREE.Mesh(
+      new THREE.TorusGeometry(r, rimT, 8, SEG),
+      new THREE.MeshStandardMaterial({ color: 0x4e6175 })
+    );
+    rim.rotation.x = Math.PI / 2;
+    rim.position.y = y;
+    add(rim);
+  });
+
+  // 바닥판
+  const bot = new THREE.Mesh(
+    new THREE.CircleGeometry(rb, SEG),
+    new THREE.MeshStandardMaterial({
+      color: 0x96abbc, side: THREE.DoubleSide,
+      transparent: true, opacity: 0.58
+    })
+  );
+  bot.rotation.x = -Math.PI / 2;
+  bot.position.y = 0.001;
+  add(bot);
+
+  // 물
+  if (h0 > 1e-4) {
+    const water = new THREE.Mesh(
+      new THREE.CylinderGeometry(r_w, rb, h0, SEG, 1, false),
+      new THREE.MeshPhysicalMaterial({
+        color: 0x2563eb, transparent: true, opacity: 0.58,
+        roughness: 0, metalness: 0,
+      })
+    );
+    water.position.y = h0 / 2;
+    add(water);
+
+    // 수면
+    const surf = new THREE.Mesh(
+      new THREE.CircleGeometry(r_w * 0.999, SEG),
+      new THREE.MeshStandardMaterial({
+        color: 0x93c5fd, transparent: true, opacity: 0.82,
+        side: THREE.DoubleSide, roughness: 0,
+      })
+    );
+    surf.rotation.x = -Math.PI / 2;
+    surf.position.y = h0 + 0.001;
+    add(surf);
+  }
+
+  // 회전축 (점선)
+  const axPts = [];
+  const axN = 22, axY0 = -H * 0.14, axLen = H * 1.28;
+  for (let i = 0; i < axN; i++) {
+    axPts.push(
+      new THREE.Vector3(0, axY0 + axLen * (i / axN), 0),
+      new THREE.Vector3(0, axY0 + axLen * ((i + 0.46) / axN), 0)
+    );
+  }
+  add(new THREE.LineSegments(
+    new THREE.BufferGeometry().setFromPoints(axPts),
+    new THREE.LineBasicMaterial({ color: 0x94a3b8, transparent: true, opacity: 0.65 })
+  ));
+
+  // 바닥 그리드
+  const gs = Math.max(maxR * 5, H * 1.8);
+  const grid = new THREE.GridHelper(gs, 8, 0xcfd9e3, 0xe2e8f0);
+  grid.position.y = -0.001;
+  add(grid);
+}
+
+// ═══════════════════════════════════════════════
+// 계산식 패널
+// ═══════════════════════════════════════════════
+
+function updateFormula(res, haEnabled, haParams) {
+  if (!res || !document.getElementById('formula-box').open) return;
+  document.getElementById('f-D').textContent   = `${res.D.toExponential(3)} m²/s`;
+  document.getElementById('f-cs').textContent  = `${res.cs.toExponential(3)} kg/m³`;
+  document.getElementById('f-dc').textContent  = `${res.deltaC.toExponential(3)} kg/m³`;
+  document.getElementById('f-lam').textContent = `${res.lambda.toFixed(3)} mm`;
+  document.getElementById('f-h0').textContent  = `${res.h0_mm.toFixed(3)} mm`;
+  document.getElementById('f-K').textContent   = `${res.K.toExponential(3)} m²/s`;
+  document.getElementById('f-al').textContent  = `${res.alpha.toFixed(3)} mm`;
+  const tau = fmtTime(res.tau);
+  document.getElementById('f-tau').textContent = `${tau.val} ${tau.unit}`;
+
+  const haSection = document.getElementById('ha-formula-section');
+  if (haEnabled && haParams) {
+    haSection.style.display = 'block';
+    document.getElementById('f-mw').textContent  = haParams.mwName;
+    document.getElementById('f-k2').textContent  = haParams.k2.toExponential(2) + ' mL²/mg²';
+    document.getElementById('f-aw0').textContent = haParams.a_w_init.toFixed(4);
+    document.getElementById('f-ceq').textContent = isFinite(haParams.c_eq)
+      ? haParams.c_eq.toFixed(1) + ' mg/mL' : '∞';
+  } else {
+    haSection.style.display = 'none';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('formula-box').addEventListener('toggle', () => {
+    const p = getValues();
+    const res = simulate(p.T, p.RH, p.rbot, p.rtop, p.H, p.V0);
+    const haEnabled = true;
+    let haParams = null;
+    if (haEnabled) {
+      const c0 = parseFloat(document.getElementById('c0-n').value);
+      const mwKey = document.querySelector('.mw-btn.active').dataset.mw;
+      const { k2, name: mwName } = HA_PARAMS[mwKey];
+      const RH = p.RH / 100;
+      const ln_RH = (RH > 1e-9 && RH < 1) ? -Math.log(RH) : 0;
+      const c_eq = ln_RH > 0 ? Math.sqrt(ln_RH / k2) : Infinity;
+      const a_w_init = Math.exp(-k2 * c0 * c0);
+      haParams = { k2, mwName, c_eq, a_w_init };
+    }
+    updateFormula(res, haEnabled, haParams);
+  });
+});
+
+// ═══════════════════════════════════════════════
+// 컨트롤 & 업데이트
+// ═══════════════════════════════════════════════
+
+function fmtTime(min) {
+  if (!isFinite(min)) return { val: '∞', unit: '' };
+  if (min < 90)     return { val: min.toFixed(1),        unit: 'min' };
+  if (min < 2880)   return { val: (min/60).toFixed(2),   unit: 'hr' };
+  return              { val: (min/1440).toFixed(2),       unit: 'day' };
+}
+
+function fmtRate(r) {
+  if (r === 0) return '0';
+  return r < 0.001 ? r.toExponential(2) : r.toFixed(4);
+}
+
+function getValues() {
+  return {
+    T:    parseFloat(document.getElementById('T-n').value),
+    RH:   parseFloat(document.getElementById('RH-n').value),
+    rbot: parseFloat(document.getElementById('rbot-n').value),
+    rtop: parseFloat(document.getElementById('rtop-n').value),
+    H:    parseFloat(document.getElementById('H-n').value),
+    V0:   parseFloat(document.getElementById('V0-n').value),
+  };
+}
+
+function updateHAMetrics(resHA, tau_w_min, V0_uL) {
+  const haSection = document.getElementById('ha-section');
+  if (!resHA) { haSection.style.display = 'none'; return; }
+  haSection.style.display = 'block';
+
+  // HA 종료 시간
+  if (resHA.t_stop_min !== null) {
+    const tm = fmtTime(resHA.t_stop_min);
+    document.getElementById('ha-tau-v').textContent = tm.val;
+    document.getElementById('ha-tau-u').textContent = resHA.stopped ? tm.unit + ' 평형' : tm.unit;
+  } else {
+    document.getElementById('ha-tau-v').textContent = '—';
+    document.getElementById('ha-tau-u').textContent = '';
+  }
+
+  // 잔류 부피 + 초기 대비 %
+  const pctEl = document.getElementById('ha-veq-pct');
+  if (resHA.stopped && resHA.V_eq !== null) {
+    document.getElementById('ha-veq-v').textContent = resHA.V_eq.toFixed(3);
+    const pct = V0_uL > 0 ? (resHA.V_eq / V0_uL * 100) : 0;
+    pctEl.textContent = `초기 대비 ${pct.toFixed(1)}%`;
+  } else {
+    document.getElementById('ha-veq-v').textContent = '0.000';
+    pctEl.textContent = '초기 대비 0%';
+  }
+
+  // 최종 농도
+  if (resHA.c_final !== null) {
+    document.getElementById('ha-cf-v').textContent = resHA.c_final.toFixed(1);
+  } else {
+    document.getElementById('ha-cf-v').textContent = '∞';
+  }
+
+  // 시간 배수
+  if (resHA.ratio !== null) {
+    document.getElementById('ha-ratio-v').textContent = resHA.ratio.toFixed(2);
+    document.getElementById('ha-ratio-u').textContent = resHA.stopped ? '× (평형)' : '×';
+  } else {
+    document.getElementById('ha-ratio-v').textContent = '—';
+    document.getElementById('ha-ratio-u').textContent = '';
+  }
+}
+
+function update() {
+  const p = getValues();
+
+  const Vmax = cupVolume(p.H*1e-3, p.rbot*1e-3, p.rtop*1e-3, p.H*1e-3) * 1e9;
+  document.getElementById('warn-vol').style.display = p.V0 > Vmax ? 'block' : 'none';
+
+  const res = simulate(p.T, p.RH, p.rbot, p.rtop, p.H, p.V0);
+  if (!res) return;
+
+  // 메트릭 업데이트
+  document.getElementById('rate-v').textContent = fmtRate(res.rate0);
+  const tm = fmtTime(res.tau);
+  window._tauUnit = tm.unit;
+  document.getElementById('tau-v').textContent = tm.val;
+  document.getElementById('tau-u').textContent = tm.unit;
+  document.getElementById('h0-v').textContent  = res.h0_mm.toFixed(2);
+
+  if (res.t70 !== null) {
+    const t70m = fmtTime(res.t70);
+    document.getElementById('t70-v').textContent = t70m.val;
+    document.getElementById('t70-u').textContent = t70m.unit;
+  } else {
+    document.getElementById('t70-v').textContent = '—';
+    document.getElementById('t70-u').textContent = '';
+  }
+
+  // x축 단위 결정 (순수물 기준)
+  window._tauUnit = tm.unit;
+
+  // HA 시뮬레이션
+  const haEnabled = true;
+  let resHA   = null;
+  let haParams = null;
+
+  if (haEnabled) {
+    const c0    = parseFloat(document.getElementById('c0-n').value);
+    const mwKey = document.querySelector('.mw-btn.active').dataset.mw;
+    resHA = simulateHA(p.T, p.RH, p.rbot, p.rtop, p.H, p.V0, c0, mwKey, res.tau);
+
+    // HA가 더 긴 경우 단위 재조정
+    const haMax = resHA.times[resHA.times.length - 1];
+    const wMax  = isFinite(res.tau) ? res.tau : 0;
+    window._tauUnit = fmtTime(Math.max(haMax, wMax)).unit;
+
+    haParams = { k2: resHA.k2, mwName: resHA.mwName,
+                 c_eq: resHA.c_eq, a_w_init: resHA.a_w_init };
+  }
+
+  // 공유 x축 max
+  const wTau  = isFinite(res.tau) ? res.tau : 100;
+  const haTau = resHA ? resHA.times[resHA.times.length - 1] : 0;
+  const xMax  = Math.max(wTau, haTau) * 1.05;
+
+  window._lastWaterRes = res;
+  window._lastHARes    = resHA;
+
+  refreshWaterChart(res, xMax);
+  if (resHA) refreshHAChart(resHA, xMax);
+  updateHAMetrics(resHA, res.tau, p.V0);
+  drawCup(p.rbot, p.rtop, p.H, res.h0_mm);
+  updateFormula(res, haEnabled, haParams);
+}
+
+// 슬라이더 연결
+function link(id) {
+  const n = document.getElementById(`${id}-n`);
+  const r = document.getElementById(`${id}-r`);
+  n.addEventListener('input', () => { r.value = n.value; update(); });
+  r.addEventListener('input', () => { n.value = r.value; update(); });
+}
+['T','RH','rbot','rtop','H','V0'].forEach(link);
+
+// HA 슬라이더
+link('c0');
+
+// MW 버튼
+document.querySelectorAll('.mw-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mw-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    update();
+  });
+});
+
+// ═══════════════════════════════════════════════
+// xlsx 다운로드
+// ═══════════════════════════════════════════════
+
+function downloadXlsx(type) {
+  if (typeof XLSX === 'undefined') {
+    alert('SheetJS 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.');
+    return;
+  }
+  let rows, filename;
+  if (type === 'water') {
+    const res = window._lastWaterRes;
+    if (!res) { alert('먼저 시뮬레이션을 실행해주세요.'); return; }
+    rows = [['시간 (min)', '부피 (μL)']].concat(
+      res.times.map((t, i) => [+t.toFixed(4), +res.volumes[i].toFixed(6)])
+    );
+    filename = '순수물_증발곡선.xlsx';
+  } else {
+    const res = window._lastHARes;
+    if (!res) { alert('HA 시뮬레이션 데이터가 없습니다.'); return; }
+    rows = [['시간 (min)', '부피 (μL)']].concat(
+      res.times.map((t, i) => [+t.toFixed(4), +res.volumes[i].toFixed(6)])
+    );
+    filename = 'HA_증발곡선.xlsx';
+  }
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'data');
+  XLSX.writeFile(wb, filename);
+}
+
+// ═══════════════════════════════════════════════
+// 초기화
+// ═══════════════════════════════════════════════
+
+window.addEventListener('load', () => {
+  initCharts();
+  update();
+});
+</script>
+</body>
+</html>
