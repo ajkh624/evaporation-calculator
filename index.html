@@ -502,7 +502,10 @@ input[type=range].ha-range { accent-color: #0d9488; }
     </div>
 
     <hr class="divider">
-    <div class="section-title">컵 기하학</div>
+    <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;">
+      컵 기하학
+      <button onclick="setDefaultCup()" style="font-size:0.72rem;padding:3px 10px;border:1.5px solid #2563eb;border-radius:6px;background:#eff6ff;color:#1d4ed8;font-weight:700;cursor:pointer;" title="바닥반지름 1mm / 입구반지름 1.5mm / 높이 1mm / 초기부피 2μL">기본값</button>
+    </div>
 
     <div class="cup-wrap">
       <canvas id="cup-3d" style="border-radius:8px;display:block;"></canvas>
@@ -2189,6 +2192,15 @@ function link(id) {
   r.addEventListener('input', () => { n.value = r.value; update(); });
 }
 ['T','RH','rbot','rtop','H','V0'].forEach(link);
+
+function setDefaultCup() {
+  const defaults = { rbot: 1.0, rtop: 1.5, H: 1.0, V0: 2.0 };
+  for (const [id, val] of Object.entries(defaults)) {
+    document.getElementById(`${id}-n`).value = val;
+    document.getElementById(`${id}-r`).value = val;
+  }
+  update();
+}
 
 // HA 슬라이더
 link('c0');
