@@ -455,10 +455,96 @@ input[type=range].ha-range { accent-color: #0d9488; }
 .key-badge.up   { background: #dcfce7; color: #15803d; }
 .key-badge.down { background: #fef9c3; color: #92400e; }
 
+/* ── 반응형: 태블릿 ── */
 @media (max-width: 860px) {
   main { grid-template-columns: 1fr; }
   .metrics-grid { grid-template-columns: repeat(2, 1fr); }
   .explain-grid { grid-template-columns: 1fr; }
+}
+
+/* ── 반응형: 모바일 ── */
+@media (max-width: 600px) {
+  header {
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    gap: 8px;
+  }
+  header h1 { font-size: 0.95rem; }
+  header .sub { font-size: 0.72rem; }
+  .badge {
+    margin-left: 0;
+    font-size: 0.68rem;
+    padding: 2px 8px;
+  }
+
+  main {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .panel {
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  /* 컨트롤 */
+  .ctrl-label { font-size: 0.82rem; }
+  .ctrl-right input[type=number] {
+    width: 56px;
+    font-size: 0.82rem;
+    padding: 3px 5px;
+  }
+  input[type=range] { height: 6px; }
+
+  /* 컵 3D 캔버스 */
+  #cup-3d { width: 100% !important; max-width: 280px; height: auto !important; }
+
+  /* 메트릭 카드 */
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .metric-card { padding: 9px 10px; border-radius: 8px; }
+  .metric-value { font-size: 1.1rem; }
+  .metric-label { font-size: 0.68rem; }
+  .metric-unit  { font-size: 0.68rem; }
+
+  /* 차트 */
+  .chart-wrap { height: 220px; }
+  .ha-chart-wrap { height: 190px; }
+
+  /* MW 버튼 */
+  .mw-buttons { gap: 5px; }
+  .mw-btn { padding: 5px 8px; font-size: 0.74rem; }
+
+  /* 다운로드 버튼 */
+  .dl-btn { font-size: 0.75rem; padding: 6px 12px; width: 100%; justify-content: center; }
+
+  /* 공식 박스 */
+  .formula-box summary { font-size: 0.76rem; padding: 8px 12px; }
+  .formula-inner { font-size: 0.72rem; padding: 10px; }
+  .formula-inner .eq { font-size: 0.70rem; padding: 5px 8px; overflow-x: auto; white-space: nowrap; }
+
+  /* 설명 섹션 */
+  .desc-section { padding: 0 10px; margin-top: 10px; }
+  .desc-card { padding: 14px 16px; }
+  .desc-card h2 { font-size: 0.92rem; }
+  .desc-card .subtitle { font-size: 0.78rem; }
+  .desc-grid { gap: 12px; }
+  .desc-block h3 { font-size: 0.68rem; }
+  .desc-block ul li { font-size: 0.76rem; line-height: 1.65; }
+
+  /* 실험계획 테이블 가로 스크롤 */
+  .exp-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .exp-table { min-width: 480px; }
+  .exp-grid2 { grid-template-columns: 1fr; }
+
+  /* 원리 설명 카드 */
+  .explain-grid { grid-template-columns: 1fr; gap: 10px; }
+  .explain-card-head { font-size: 0.82rem; padding: 9px 12px; }
+  .explain-body { font-size: 0.78rem; padding: 10px 12px; }
+  .explain-formula-row { font-size: 0.70rem; margin: 8px 10px; overflow-x: auto; white-space: nowrap; }
+  .explain-illus svg { max-width: 100%; height: auto; }
 }
 
 /* ── 설명 섹션 ── */
@@ -1210,7 +1296,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
       잔류 비율 V<sub>eq</sub>/V₀ = c₀ / c<sub>eq</sub>&nbsp;&nbsp;
       [RH = 0.50 → c<sub>eq</sub>(1 MDa) = √(0.6931 / 1.36×10⁻⁴) = <strong>71.4 mg/mL</strong>]
     </p>
-    <table class="exp-table">
+    <div class="exp-table-wrap"><table class="exp-table">
       <thead><tr>
         <th>그룹</th><th>재료</th><th>c₀ (mg/mL)</th>
         <th>c<sub>eq</sub> (mg/mL)</th><th>a<sub>w,init</sub></th><th>예측 V<sub>eq</sub>/V₀</th><th>목적</th>
@@ -1229,7 +1315,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
           <td><span class="exp-badge pass">≥ 85 %</span></td><td>목표 조건 ★</td>
         </tr>
       </tbody>
-    </table>
+    </table></div>
     <div class="exp-note">
       세 그룹 모두 a<sub>w,init</sub> &gt; RH (0.50) 이므로 증발이 시작됨.
       G-Target: a<sub>w</sub>(60.7 mg/mL) = exp(−1.36×10⁻⁴ × 60.7²) = 0.606 &gt; 0.50 ✓&nbsp;&nbsp;
@@ -1286,7 +1372,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
 
     <!-- 분석 -->
     <div class="exp-sub">④ 데이터 분석</div>
-    <table class="exp-table">
+    <div class="exp-table-wrap"><table class="exp-table">
       <thead><tr><th>항목</th><th>계산식</th><th>방법</th></tr></thead>
       <tbody>
         <tr><td>잔류 부피 비율</td>
@@ -1302,7 +1388,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
           <td>예측값 vs 실측값 선형 회귀, r² ≥ 0.85 목표</td>
           <td>전 그룹 대조</td></tr>
       </tbody>
-    </table>
+    </table></div>
 
     <!-- 성공 기준 & 일정 -->
     <div class="exp-sub">⑤ 성공 기준 및 일정</div>
@@ -1356,7 +1442,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
 
     <!-- 대체 성분 기본 정보 -->
     <div class="exp-sub">① 대체 성분 목록 (상온 액체 · 저가 화장품 성분)</div>
-    <table class="exp-table">
+    <div class="exp-table-wrap"><table class="exp-table">
       <thead><tr>
         <th>성분</th><th>분자량</th><th>OH기</th><th>상태 (25 °C)</th>
         <th>원가 (bulk)</th><th>주요 용도</th>
@@ -1383,7 +1469,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
           <td>~400,000 원/kg</td><td>고급 보습, 점도 부여</td>
         </tr>
       </tbody>
-    </table>
+    </table></div>
 
     <!-- 핵심 비교: c_eq 및 85% 조건 -->
     <div class="exp-sub">② 평형 농도 c<sub>eq</sub> 및 85% 달성 조건 (RH = 95 %, T = 25 °C)</div>
@@ -1395,7 +1481,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
       HA: a<sub>w</sub> = exp(−k₂·c²) &nbsp;(k₂=1.36×10⁻⁴ for 1 MDa) &nbsp;·&nbsp;
       소분자: a<sub>w</sub> = exp(−k·c), k = −ln(0.95)/c<sub>eq</sub> (c<sub>eq</sub>에서 RH와 일치하도록 역산)
     </p>
-    <table class="exp-table">
+    <div class="exp-table-wrap"><table class="exp-table">
       <thead><tr>
         <th>성분</th>
         <th>c<sub>eq</sub> (mg/mL)</th>
@@ -1453,7 +1539,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
             <span style="font-size:0.72rem;">비용 61% 절감</span></td>
         </tr>
       </tbody>
-    </table>
+    </table></div>
     <p style="font-size:0.75rem;color:#94a3b8;margin-bottom:14px;">
       *bulk 추정가 기준 (HA ~500,000 원/kg, 글리세린 ~1,500 원/kg, PG ~2,000 원/kg, BG ~8,000 원/kg).
       글리세린·PG·BG는 물과 <strong>완전 혼화(infinitely miscible)</strong> — 용해도 제한 없음.
@@ -1463,7 +1549,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
 
     <!-- V_eq/V₀ 대조표 -->
     <div class="exp-sub">③ 농도별 V<sub>eq</sub>/V₀ 비교 (RH = 95 %, T = 25 °C)</div>
-    <table class="exp-table">
+    <div class="exp-table-wrap"><table class="exp-table">
       <thead><tr>
         <th>초기 농도 c₀</th>
         <th>HA 1 MDa</th>
@@ -1514,7 +1600,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
           <td>← 글리세린/PG/BG 85 % 조건</td>
         </tr>
       </tbody>
-    </table>
+    </table></div>
 
     <!-- 해석 -->
     <div class="exp-sub">④ 해석 및 결론</div>
@@ -1979,7 +2065,9 @@ let _cup3d = null;
 
 function init3DCup() {
   const canvas = document.getElementById('cup-3d');
-  const W = 200, SH = 210;
+  const isMobile = window.innerWidth <= 600;
+  const W = isMobile ? Math.min(window.innerWidth - 60, 260) : 200;
+  const SH = isMobile ? Math.round(W * 1.05) : 210;
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf8fafc);
