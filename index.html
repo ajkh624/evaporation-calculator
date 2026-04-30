@@ -775,6 +775,12 @@ input[type=range].ha-range { accent-color: #0d9488; }
 .ln-p1 { background: #dc2626; color: #fff; }
 .ln-p2 { background: #2563eb; color: #fff; }
 .ln-p3 { background: #64748b; color: #fff; }
+.ln-chart-wrap {
+  position: relative;
+  width: 100%;
+  margin: 10px 0 4px;
+}
+.ln-chart-wrap canvas { width: 100% !important; }
 .ln-strategy-box {
   background: #f0fdf4;
   border: 1.5px solid #16a34a;
@@ -1935,52 +1941,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
   <!-- 4. 실험 결과 -->
   <div class="ln-section">
     <div class="ln-section-title">4. 실험 결과</div>
-    <table class="ln-table">
-      <thead>
-        <tr>
-          <th>시간</th>
-          <th>패치 무게 (g)</th>
-          <th>잔류 담지량 (mg)</th>
-          <th>이론 V/V₀</th>
-          <th>실측 V/V₀</th>
-          <th>격차</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>0분</td>
-          <td>6.961</td>
-          <td>305</td>
-          <td>100.0%</td>
-          <td>100.0%</td>
-          <td class="gap-low">0.0%p</td>
-        </tr>
-        <tr>
-          <td>30분</td>
-          <td>6.840</td>
-          <td>184</td>
-          <td>86.0%</td>
-          <td>60.3%</td>
-          <td class="gap-high">25.7%p</td>
-        </tr>
-        <tr>
-          <td>60분</td>
-          <td>6.675</td>
-          <td>19</td>
-          <td>81.2%</td>
-          <td>6.2%</td>
-          <td class="gap-high">75.0%p</td>
-        </tr>
-        <tr>
-          <td>120분</td>
-          <td>6.666</td>
-          <td>10</td>
-          <td>79.0%</td>
-          <td>3.3%</td>
-          <td class="gap-high">75.7%p</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="ln-chart-wrap"><canvas id="ln-chart-result"></canvas></div>
     <div style="font-size:0.76rem;color:#64748b;margin-top:8px;">
       * 빈 패치(담지액 없음) 기준 무게: 6.656 g
     </div>
@@ -2044,112 +2005,14 @@ input[type=range].ha-range { accent-color: #0d9488; }
     <!-- 레버 분석 표 -->
     <div style="margin-bottom:18px;">
       <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:8px;">▸ 레버별 85% 달성 임계값</div>
-      <table class="ln-table">
-        <thead>
-          <tr>
-            <th>레버</th>
-            <th>현재값</th>
-            <th>이론 잔류율</th>
-            <th>85% 달성 임계</th>
-            <th>임계값 잔류율</th>
-            <th>비고</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>포장 내 RH</strong></td>
-            <td>24%</td>
-            <td class="ln-fail">68.4%</td>
-            <td><strong>≥ 40%</strong></td>
-            <td class="ln-pass">85.4%</td>
-            <td>c₀ = 20 mg/mL, MW = 10 kDa 고정</td>
-          </tr>
-          <tr>
-            <td><strong>초기 농도 c₀</strong></td>
-            <td>20 mg/mL</td>
-            <td class="ln-fail">68.4%</td>
-            <td><strong>≥ 25 mg/mL</strong></td>
-            <td class="ln-pass">85.6%</td>
-            <td>MW = 10 kDa, RH = 24% 고정 / 30 mg/mL 이상: 즉시 평형(증발 없음)</td>
-          </tr>
-          <tr>
-            <td><strong>분자량 MW</strong></td>
-            <td>10 kDa</td>
-            <td class="ln-fail">68.4%</td>
-            <td><strong>≤ 4 kDa</strong></td>
-            <td class="ln-pass">96.5% (3 kDa)</td>
-            <td>c₀ = 20 mg/mL, RH = 24% 고정 / 5 kDa → 83.4% (아슬)</td>
-          </tr>
-          <tr>
-            <td><strong>밀봉 타이밍</strong></td>
-            <td>개방 노출</td>
-            <td class="ln-fail">68.4%↓</td>
-            <td><strong>담지 즉시 밀봉</strong></td>
-            <td class="ln-pass">~100%</td>
-            <td>a_w(초기) = 0.51 → 밀봉 시 내부 RH → 51% 수렴 → 증발 정지</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="ln-chart-wrap"><canvas id="ln-chart-lever"></canvas></div>
     </div>
 
     <!-- 분자량-RH 매트릭스 -->
     <div style="margin-bottom:18px;">
       <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:8px;">▸ MW × RH 잔류율 매트릭스 (c₀ = 20 mg/mL)</div>
-      <table class="ln-table">
-        <thead>
-          <tr>
-            <th>MW \ RH</th>
-            <th>24%</th>
-            <th>30%</th>
-            <th>35%</th>
-            <th>40%</th>
-            <th>50%</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>3 kDa</strong></td>
-            <td class="ln-pass">96.5%</td>
-            <td class="ln-pass">100%</td>
-            <td class="ln-pass">100%</td>
-            <td class="ln-pass">100%</td>
-            <td class="ln-pass">100%</td>
-          </tr>
-          <tr>
-            <td><strong>5 kDa</strong></td>
-            <td class="ln-neutral">83.4%</td>
-            <td class="ln-pass">90.8%</td>
-            <td class="ln-pass">97.2%</td>
-            <td class="ln-pass">100%</td>
-            <td class="ln-pass">100%</td>
-          </tr>
-          <tr>
-            <td><strong>10 kDa ← 현재</strong></td>
-            <td class="ln-fail">68.4%</td>
-            <td class="ln-neutral">74.5%</td>
-            <td class="ln-neutral">79.8%</td>
-            <td class="ln-pass">85.4%</td>
-            <td class="ln-pass">98.2%</td>
-          </tr>
-          <tr>
-            <td><strong>50 kDa</strong></td>
-            <td class="ln-fail">43.3%</td>
-            <td class="ln-fail">47.1%</td>
-            <td class="ln-fail">50.4%</td>
-            <td class="ln-fail">54.0%</td>
-            <td class="ln-neutral">62.1%</td>
-          </tr>
-          <tr>
-            <td><strong>100 kDa</strong></td>
-            <td class="ln-fail">35.5%</td>
-            <td class="ln-fail">38.7%</td>
-            <td class="ln-fail">41.4%</td>
-            <td class="ln-fail">44.3%</td>
-            <td class="ln-fail">50.9%</td>
-          </tr>
-        </tbody>
-      </table>
-      <div style="font-size:0.74rem;color:#64748b;margin-top:6px;">* 초록: ≥85%, 회색: 70~85%, 빨강: &lt;70% / 100%는 a_w₀ ≤ RH (즉시 평형, 증발 없음)</div>
+      <div class="ln-chart-wrap"><canvas id="ln-chart-matrix"></canvas></div>
+      <div style="font-size:0.74rem;color:#64748b;margin-top:6px;">점선: 85% 목표 / c₀ = 20 mg/mL 고정 / 100%는 즉시 평형 (증발 없음)</div>
     </div>
 
     <!-- 우선순위 실험 계획 -->
@@ -3680,7 +3543,195 @@ function downloadXlsx(type) {
 window.addEventListener('load', () => {
   initCharts();
   update();
+  initLabNoteCharts();
 });
+
+// ═══════════════════════════════════════════════
+// 실험노트 차트
+// ═══════════════════════════════════════════════
+
+function initLabNoteCharts() {
+  const targetLine = (len, val) => Array(len).fill(val);
+  const chartDefaults = {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 14 } } },
+    scales: {
+      x: { grid: { color: '#e2e8f0' }, ticks: { font: { size: 11 } } },
+      y: { grid: { color: '#e2e8f0' }, ticks: { font: { size: 11 } } }
+    }
+  };
+
+  // ── Chart 1: 이론 vs 실측 V/V₀ ─────────────────
+  const ctxR = document.getElementById('ln-chart-result');
+  if (ctxR) {
+    new Chart(ctxR, {
+      type: 'line',
+      data: {
+        labels: ['0분', '30분', '60분', '120분'],
+        datasets: [
+          {
+            label: '이론 V/V₀',
+            data: [100, 86.0, 81.2, 79.0],
+            borderColor: '#2563eb', backgroundColor: '#2563eb22',
+            borderWidth: 2.5, pointRadius: 5, fill: false, tension: 0.25
+          },
+          {
+            label: '실측 V/V₀',
+            data: [100, 60.3, 6.2, 3.3],
+            borderColor: '#dc2626', backgroundColor: '#dc262622',
+            borderWidth: 2.5, pointRadius: 5, fill: false, tension: 0.25
+          },
+          {
+            label: '85% 목표선',
+            data: targetLine(4, 85),
+            borderColor: '#16a34a', borderDash: [6, 4],
+            borderWidth: 1.8, pointRadius: 0, fill: false
+          }
+        ]
+      },
+      options: {
+        ...chartDefaults,
+        plugins: {
+          ...chartDefaults.plugins,
+          tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y}%` } }
+        },
+        scales: {
+          x: { ...chartDefaults.scales.x, title: { display: true, text: '경과 시간', font: { size: 11 } } },
+          y: {
+            ...chartDefaults.scales.y,
+            min: 0, max: 105,
+            title: { display: true, text: 'V/V₀ (%)', font: { size: 11 } }
+          }
+        }
+      }
+    });
+  }
+
+  // ── Chart 2: 레버별 잔류율 비교 ─────────────────
+  const ctxL = document.getElementById('ln-chart-lever');
+  if (ctxL) {
+    new Chart(ctxL, {
+      type: 'bar',
+      data: {
+        labels: ['포장 내 RH', '초기 농도 c₀', '분자량 MW', '밀봉 타이밍'],
+        datasets: [
+          {
+            label: '현재 잔류율',
+            data: [68.4, 68.4, 68.4, 68.4],
+            backgroundColor: '#dc262688', borderColor: '#dc2626',
+            borderWidth: 1.5
+          },
+          {
+            label: '임계값 달성 시',
+            data: [85.4, 85.6, 96.5, 100],
+            backgroundColor: '#16a34a88', borderColor: '#16a34a',
+            borderWidth: 1.5
+          }
+        ]
+      },
+      options: {
+        ...chartDefaults,
+        indexAxis: 'y',
+        plugins: {
+          ...chartDefaults.plugins,
+          annotation: {},
+          tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.x}%` } }
+        },
+        scales: {
+          x: {
+            ...chartDefaults.scales.x,
+            min: 0, max: 105,
+            title: { display: true, text: 'V/V₀ (%)', font: { size: 11 } }
+          },
+          y: { ...chartDefaults.scales.y, ticks: { font: { size: 11 } } }
+        },
+        animation: { onComplete(ctx) {
+          const chart = ctx.chart;
+          const { ctx: c, chartArea, scales } = chart;
+          const x85 = scales.x.getPixelForValue(85);
+          c.save();
+          c.strokeStyle = '#16a34a';
+          c.lineWidth = 1.8;
+          c.setLineDash([6, 4]);
+          c.beginPath();
+          c.moveTo(x85, chartArea.top);
+          c.lineTo(x85, chartArea.bottom);
+          c.stroke();
+          c.font = '10px sans-serif';
+          c.fillStyle = '#16a34a';
+          c.fillText('85%', x85 + 4, chartArea.top + 14);
+          c.restore();
+        }}
+      }
+    });
+  }
+
+  // ── Chart 3: MW × RH 잔류율 매트릭스 ──────────
+  const ctxM = document.getElementById('ln-chart-matrix');
+  if (ctxM) {
+    const rhLabels = ['24%', '30%', '35%', '40%', '50%'];
+    new Chart(ctxM, {
+      type: 'line',
+      data: {
+        labels: rhLabels,
+        datasets: [
+          {
+            label: '3 kDa',
+            data: [96.5, 100, 100, 100, 100],
+            borderColor: '#16a34a', backgroundColor: 'transparent',
+            borderWidth: 2.2, pointRadius: 4, tension: 0.25
+          },
+          {
+            label: '5 kDa',
+            data: [83.4, 90.8, 97.2, 100, 100],
+            borderColor: '#2563eb', backgroundColor: 'transparent',
+            borderWidth: 2.2, pointRadius: 4, tension: 0.25
+          },
+          {
+            label: '10 kDa (현재)',
+            data: [68.4, 74.5, 79.8, 85.4, 98.2],
+            borderColor: '#d97706', backgroundColor: 'transparent',
+            borderWidth: 2.5, pointRadius: 5, borderDash: [], tension: 0.25
+          },
+          {
+            label: '50 kDa',
+            data: [43.3, 47.1, 50.4, 54.0, 62.1],
+            borderColor: '#dc2626', backgroundColor: 'transparent',
+            borderWidth: 2, pointRadius: 4, tension: 0.25
+          },
+          {
+            label: '100 kDa',
+            data: [35.5, 38.7, 41.4, 44.3, 50.9],
+            borderColor: '#9333ea', backgroundColor: 'transparent',
+            borderWidth: 2, pointRadius: 4, tension: 0.25
+          },
+          {
+            label: '85% 목표선',
+            data: targetLine(5, 85),
+            borderColor: '#16a34a', borderDash: [6, 4],
+            borderWidth: 1.8, pointRadius: 0, fill: false
+          }
+        ]
+      },
+      options: {
+        ...chartDefaults,
+        plugins: {
+          ...chartDefaults.plugins,
+          tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}%` } }
+        },
+        scales: {
+          x: { ...chartDefaults.scales.x, title: { display: true, text: '포장 내 RH', font: { size: 11 } } },
+          y: {
+            ...chartDefaults.scales.y,
+            min: 20, max: 105,
+            title: { display: true, text: 'V/V₀ (%)', font: { size: 11 } }
+          }
+        }
+      }
+    });
+  }
+}
 </script>
 </body>
 </html>
