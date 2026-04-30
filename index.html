@@ -2212,6 +2212,490 @@ input[type=range].ha-range { accent-color: #0d9488; }
   </div>
 
 </div><!-- .lab-note -->
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  종합 연구 전략 보고서 (별도 문서)                         -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="lab-note" style="margin-top:40px;border-top:3px solid #1e40af;padding-top:36px;">
+
+  <div class="ln-download-row">
+    <button class="ln-dl-btn" onclick="printLabNote()">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 9h-4V3H9v6H5l7 7 7-7zm-8 2V5h2v6h1.17L12 13.17 9.83 11H11zm-6 7h14v2H5v-2z"/></svg>
+      PDF 다운로드
+    </button>
+  </div>
+
+  <div class="ln-header">
+    <div class="ln-title">음압컵 담지패치 — 포장 내 평형 부피 85% 보존 종합 연구 전략</div>
+    <div class="ln-meta">
+      <span><strong>날짜</strong> 2026-04-30</span>
+      <span><strong>작성</strong> MIMETICS 연구팀</span>
+      <span><strong>분류</strong> 연구 전략 보고서</span>
+      <span><strong>버전</strong> v1.0</span>
+    </div>
+  </div>
+
+  <!-- 1. 문제 정의 -->
+  <div class="ln-section">
+    <div class="ln-section-title">1. 문제 정의 및 목표 재정의</div>
+
+    <div class="ln-grid-2" style="margin-bottom:14px;">
+      <div>
+        <div class="ln-row"><span class="ln-label">예비 실험 결과</span><span class="ln-value">60분 이론치 81.2% vs 실측 6.2% — 격차 75%p</span></div>
+        <div class="ln-row"><span class="ln-label">시뮬레이터 예측</span><span class="ln-value">RH=34% 조건, V/V₀ ≈ 79% 평형 수렴</span></div>
+        <div class="ln-row"><span class="ln-label">실제 결과</span><span class="ln-value">거의 완전 건조, HA 고체화 후 탈착</span></div>
+      </div>
+      <div>
+        <div class="ln-row"><span class="ln-label">목표 재정의</span><span class="ln-value">단순 "평형 부피 달성"이 아닌</span></div>
+        <div class="ln-row"><span class="ln-label"></span><span class="ln-value"><strong>포장 보관 중 담지액 손실 방지</strong></span></div>
+        <div class="ln-row"><span class="ln-label">정량 스펙</span><span class="ln-value">유효기간 24개월 동안 <strong>V/V₀ ≥ 85%</strong> 유지</span></div>
+      </div>
+    </div>
+    <div class="ln-conclusion">
+      핵심 전환: <strong>"개방계에서 얼마나 증발하는가"</strong>가 아니라 <strong>"밀봉 포장 안에서 얼마나 유지되는가"</strong>가 올바른 연구 질문.
+    </div>
+  </div>
+
+  <!-- 2. 격차 원인 -->
+  <div class="ln-section">
+    <div class="ln-section-title">2. 이론-실측 격차 원인 분석</div>
+    <table class="ln-table">
+      <thead>
+        <tr><th>원인</th><th>시뮬레이터 가정</th><th>실제 환경</th><th>영향</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>계(system) 정의</strong></td>
+          <td>폐쇄계 — a_w↔RH 평형 수렴</td>
+          <td>개방계 — 무한 공기와 접촉, RH 고정</td>
+          <td class="ln-fail">비교 자체가 부적절</td>
+        </tr>
+        <tr>
+          <td><strong>RH 변동</strong></td>
+          <td>고정 (34%)</td>
+          <td>실험 중 34% → 24%로 지속 하락</td>
+          <td class="ln-fail">평형값 추가 하락</td>
+        </tr>
+        <tr>
+          <td><strong>S/V 비율</strong></td>
+          <td>단순 원뿔대 컵 기하</td>
+          <td>마이크로 음압컵 — S/V 일반 대비 10~20배</td>
+          <td class="ln-fail">증발 속도 5.7× 실제 빠름</td>
+        </tr>
+        <tr>
+          <td><strong>초기 a_w</strong></td>
+          <td>k₂ 외삽 (10 kDa, 피팅 범위 밖)</td>
+          <td>2% HA 용액 a_w ≈ 0.999 (거의 순수물)</td>
+          <td class="ln-fail">초기 증발 억제 과대 추정</td>
+        </tr>
+        <tr>
+          <td><strong>상 전이</strong></td>
+          <td>미포함</td>
+          <td>용액→겔→고체 전이, 패치 탈착</td>
+          <td class="ln-fail">고체화 후 증발 계속</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="ln-alert" style="margin-top:12px;">
+      ⚠ 결론: 시뮬레이터는 <strong>폐쇄계 평형 예측 도구</strong>이고 예비 실험은 <strong>개방계 비평형 동역학</strong>을 측정한 것 — 두 값을 동일 축에서 비교하는 것은 원천적으로 부적절.
+    </div>
+  </div>
+
+  <!-- 3. 핵심 물리화학 원리 -->
+  <div class="ln-section">
+    <div class="ln-section-title">3. 핵심 물리화학 원리</div>
+
+    <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:8px;">▸ 평형 부피를 결정하는 단 하나의 식</div>
+    <div style="background:#f8fafc;border-radius:8px;padding:12px 16px;font-size:0.82rem;color:#1e293b;line-height:1.9;margin-bottom:14px;">
+      <strong style="color:#1e40af;">a_w(용액) = RH(공기) / 100</strong> — 이 조건이 성립하는 순간 증발 정지<br>
+      평형 농도 c_eq = √(−ln RH / k₂) &nbsp;·&nbsp; 잔류율 V_eq/V₀ = c₀ / c_eq<br>
+      → RH ↑, c₀ ↑, k₂ ↑(MW ↓) 모두 잔류율을 높이는 방향
+    </div>
+
+    <div class="ln-grid-2">
+      <div>
+        <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:6px;">▸ 보습제의 실제 역할</div>
+        <ul class="ln-obs-list">
+          <li><strong>보습제 ≠ "수분 자석"</strong> — "평형 RH 조절자"</li>
+          <li>환경 RH > 처방 a_w → 수분 <strong>흡수</strong></li>
+          <li>환경 RH &lt; 처방 a_w → 수분 <strong>방출</strong></li>
+          <li>a_w를 낮출수록 낮은 RH에서도 평형 유지 가능</li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:6px;">▸ 증발 가능 vs 불가 성분</div>
+        <ul class="ln-obs-list">
+          <li><strong>증발 가능</strong>: 물 · 에탄올 등 저분자 휘발성</li>
+          <li><strong>느린 증발</strong>: 글리세롤 (매우 낮은 증기압)</li>
+          <li><strong>증발 불가</strong>: HA · 당류 · 고분자 전체</li>
+          <li>실질적으로 <strong>물만 증발</strong>, 비휘발성 성분은 농축</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 폐쇄 포장 -->
+  <div class="ln-section">
+    <div class="ln-section-title">4. 폐쇄 포장의 결정적 효과</div>
+
+    <div class="ln-grid-2" style="margin-bottom:14px;">
+      <div>
+        <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:6px;">▸ 자가 평형 메커니즘 (즉시 밀봉 시)</div>
+        <ul class="ln-obs-list">
+          <li>담지 직후 밀봉 → 포장 내 공기량 극소 (2~5 cm³)</li>
+          <li>공기 가습에 필요한 수분: &lt; 0.1 mg (전체의 &lt; 0.1%)</li>
+          <li>내부 RH → 용액 a_w로 자동 수렴</li>
+          <li>구동력(Δa_w) ≈ 0 → 증발 <strong>사실상 정지</strong></li>
+          <li>이론 잔류율 <strong>V/V₀ ≈ 99.9%</strong></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:6px;">▸ 진짜 손실 메커니즘: WVTR</div>
+        <ul class="ln-obs-list">
+          <li>밀봉 후에도 포장재 통한 <strong>수분 투과</strong>(WVTR)</li>
+          <li>WVTR 낮을수록 → 장기 잔류율 높음</li>
+          <li>손실량 ∝ WVTR × 면적 × Δ(a_w − RH_외부) × 기간</li>
+          <li><strong>포장재 선택이 24개월 스펙을 결정</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:8px;">▸ 포장재별 24개월 V/V₀ 추정 (옵션 B 처방, 25°C/60%RH 보관)</div>
+    <table class="ln-table">
+      <thead>
+        <tr><th>포장재</th><th>WVTR (g/m²·day)</th><th>24개월 V/V₀ 추정</th><th>권장 여부</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>알루미늄 라미네이트 (3중)</strong></td>
+          <td>&lt; 0.01</td>
+          <td class="ln-pass">~94%</td>
+          <td class="ln-pass">✓ 권장</td>
+        </tr>
+        <tr>
+          <td>PET/PE 2중</td>
+          <td>1 ~ 5</td>
+          <td class="ln-fail">~50~70%</td>
+          <td class="ln-fail">✗ 부적합</td>
+        </tr>
+        <tr>
+          <td>PE 단독</td>
+          <td>5 ~ 20</td>
+          <td class="ln-fail">~20~40%</td>
+          <td class="ln-fail">✗ 부적합</td>
+        </tr>
+        <tr>
+          <td>무포장 (대조군)</td>
+          <td>—</td>
+          <td class="ln-fail">~0~5%</td>
+          <td class="ln-fail">✗ 측정 불가</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="ln-conclusion" style="margin-top:12px;">
+      <strong>핵심 인사이트</strong>: 처방보다 포장재가 결정적. <strong>알루미늄 라미네이트 파우치 + 즉시 밀봉</strong>만으로 24개월 V/V₀ ≥ 85% 목표를 처방 변경 없이도 달성 가능할 수 있음 → 실험으로 검증 필요.
+    </div>
+  </div>
+
+  <!-- 5. 처방 옵션 -->
+  <div class="ln-section">
+    <div class="ln-section-title">5. 처방 옵션 비교</div>
+
+    <table class="ln-table" style="margin-bottom:16px;">
+      <thead>
+        <tr><th>옵션</th><th>처방 조성</th><th>a_w (초기)</th><th>점도</th><th>사용감</th><th>Al파우치 24개월 V/V₀</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>현재</strong></td>
+          <td>HA 2% + 정제수 98%</td>
+          <td>~0.999</td>
+          <td>낮음</td>
+          <td>매우 좋음</td>
+          <td class="ln-fail">~76%</td>
+        </tr>
+        <tr>
+          <td><strong>A</strong></td>
+          <td>글리세롤 5% + HA 2% + 정제수</td>
+          <td>0.97</td>
+          <td>낮음</td>
+          <td>좋음</td>
+          <td class="ln-neutral">~84%</td>
+        </tr>
+        <tr style="background:#f0fdf4;">
+          <td><strong>B (권장)</strong></td>
+          <td>글리세롤 10% + PD 5% + BG 3% + HA 2% + 정제수 80%</td>
+          <td>0.93</td>
+          <td>중간</td>
+          <td>보통</td>
+          <td class="ln-pass"><strong>~89%</strong></td>
+        </tr>
+        <tr>
+          <td><strong>C</strong></td>
+          <td>B + 트레할로스 3%</td>
+          <td>0.85</td>
+          <td>중간</td>
+          <td>약간 무거움</td>
+          <td class="ln-pass">~91%</td>
+        </tr>
+        <tr>
+          <td>참고 (불가)</td>
+          <td>글리세롤 74% 단독</td>
+          <td>0.29</td>
+          <td>매우 높음</td>
+          <td>매우 끈적</td>
+          <td class="ln-pass">~100%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:8px;">▸ 옵션 B 처방 상세 (권장)</div>
+    <div style="background:#f0fdf4;border:1.5px solid #16a34a;border-radius:8px;padding:14px 18px;font-size:0.84rem;font-family:monospace;line-height:1.9;">
+      글리세롤(Glycerol)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10%<br>
+      프로판다이올(Propanediol)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5%<br>
+      부틸렌글리콜(Butylene Glycol)&nbsp;3%<br>
+      히알루론산(HA, 10 kDa)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2%<br>
+      정제수(Purified Water)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;80%
+    </div>
+    <ul class="ln-obs-list" style="margin-top:10px;">
+      <li>글리세롤·PD·BG — 화장품 표준 농도 범위 내, 피부 자극 최소</li>
+      <li>a_w = 0.93 → 보관 중 적정 평형 RH 형성, 과도한 수분 흡수·방출 억제</li>
+      <li>Al파우치 24개월 이론 잔류율 ~89% → 목표 85% 초과</li>
+      <li>트레할로스 미첨가 — 결정화 위험 없음, 분주 점도 적정</li>
+    </ul>
+  </div>
+
+  <!-- 6. 포장 전략 -->
+  <div class="ln-section">
+    <div class="ln-section-title">6. 포장 및 공정 전략</div>
+
+    <div class="ln-grid-2" style="margin-bottom:14px;">
+      <div>
+        <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:6px;">▸ 1차 포장 (핵심)</div>
+        <ul class="ln-obs-list">
+          <li><strong>알루미늄 라미네이트 파우치</strong></li>
+          <li>WVTR &lt; 0.01 g/m²·day</li>
+          <li>히트시일 또는 핫멜트 밀봉</li>
+          <li>차광 · 차습 · 차산소 동시 달성</li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:6px;">▸ 2차 포장</div>
+        <ul class="ln-obs-list">
+          <li>종이 박스 (물리적 보호)</li>
+          <li>UV 차단 인쇄</li>
+          <li>보관 조건 인쇄: 25°C 이하, 직사광선 회피</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:8px;">▸ 공정별 관리 조건</div>
+    <table class="ln-table">
+      <thead>
+        <tr><th>공정 단계</th><th>환경 조건</th><th>핵심 관리 항목</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>분주·담지</strong></td>
+          <td>청정실 RH 40~50%, 23±2°C</td>
+          <td>담지 완료 후 <strong>즉시</strong> 1차 포장 이동 (노출 시간 최소화)</td>
+        </tr>
+        <tr>
+          <td><strong>1차 포장 밀봉</strong></td>
+          <td>동일 청정실</td>
+          <td>시일 온도·압력 표준화, 100% 핀홀 검사</td>
+        </tr>
+        <tr>
+          <td><strong>보관 (창고)</strong></td>
+          <td>25°C / 60% RH 이하</td>
+          <td>박스 적재, 직사광선 회피, 정기 온습도 기록</td>
+        </tr>
+        <tr>
+          <td><strong>유통·소비자</strong></td>
+          <td>25°C / 60% RH 권장</td>
+          <td>유효기간 24개월 이내 사용</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="ln-alert" style="margin-top:12px;">
+      💡 추가 습도 버퍼 소재(포화 K₂CO₃ 패드, 평형 RH=43%) 동봉은 1차 포장이 충분하지 않을 경우 검토. 단, 패치와 직접 접촉 금지 — 이온 오염 가능.
+    </div>
+  </div>
+
+  <!-- 7. 검증 실험 프로토콜 -->
+  <div class="ln-section">
+    <div class="ln-section-title">7. 검증 실험 프로토콜</div>
+
+    <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:8px;">▸ 안정성 시험 (ICH Q1A 가이드라인 준용)</div>
+    <table class="ln-table" style="margin-bottom:16px;">
+      <thead>
+        <tr><th>시험 조건</th><th>환경</th><th>측정 시점</th><th>의미</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>장기 (실시간)</strong></td>
+          <td>25°C / 60% RH</td>
+          <td>1, 3, 6, 12, 24개월</td>
+          <td>실제 유통 조건</td>
+        </tr>
+        <tr>
+          <td><strong>가속</strong></td>
+          <td>40°C / 75% RH</td>
+          <td>1, 3, 6개월</td>
+          <td>6개월 ≈ 상온 24개월</td>
+        </tr>
+        <tr>
+          <td><strong>혹독 (스트레스)</strong></td>
+          <td>60°C / 75% RH</td>
+          <td>1개월</td>
+          <td>극단 조건 한계 검증</td>
+        </tr>
+        <tr>
+          <td><strong>저온</strong></td>
+          <td>4°C / 30% RH</td>
+          <td>3, 6, 24개월</td>
+          <td>냉장 보관 영향</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:8px;">▸ 비교군 4×4 설계</div>
+    <table class="ln-table" style="margin-bottom:14px;">
+      <thead>
+        <tr><th>샘플</th><th>포장재</th><th>처방</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Sample 1</td><td>Al 라미네이트 파우치</td><td>현재 (HA 2%)</td></tr>
+        <tr><td>Sample 2</td><td>Al 라미네이트 파우치</td><td>옵션 B (권장)</td></tr>
+        <tr><td>Sample 3</td><td>PET/PE 파우치</td><td>옵션 B (권장)</td></tr>
+        <tr><td>Sample 4 (대조)</td><td>무포장 개방</td><td>옵션 B (권장)</td></tr>
+      </tbody>
+    </table>
+
+    <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:6px;">▸ 측정 항목</div>
+    <ul class="ln-obs-list">
+      <li><strong>V/V₀ (부피 잔류율)</strong> — 미세저울 정밀 중량 측정 (주 측정값)</li>
+      <li><strong>수분 활동도 a_w</strong> — Novasina 또는 AquaLab 장비 사용</li>
+      <li><strong>외관</strong> — 결정화, 침전, 분리, 변색, 겔화 여부</li>
+      <li><strong>점도</strong> — 농축에 따른 분주성 변화 (Brookfield)</li>
+      <li><strong>포장 적합성</strong> — 시일 강도, 핀홀 검사 (시간별)</li>
+    </ul>
+  </div>
+
+  <!-- 8. 실험 로드맵 -->
+  <div class="ln-section">
+    <div class="ln-section-title">8. 단계별 실험 로드맵</div>
+    <ul class="ln-obs-list">
+      <li>
+        <span class="ln-priority ln-p1">Phase 1</span>
+        <strong>기초 검증 (1~4주)</strong><br>
+        <span style="font-size:0.8rem;color:#64748b;">
+          □ 옵션 B 처방 시제 1 L 제조 및 a_w 측정<br>
+          □ 분주 정밀도 검증 (87 well 균일성, CV &lt; 5%)<br>
+          □ 밀봉 타이밍 비교 — 담지 후 0·5·15·30분 개방 후 Al파우치 밀봉 → 72 hr 중량 측정<br>
+          □ 현재 처방 vs 옵션 B 단기 증발 시험 (개방계 4 hr, 동일 조건)
+        </span>
+      </li>
+      <li>
+        <span class="ln-priority ln-p1">Phase 2</span>
+        <strong>포장 검증 (5~12주)</strong><br>
+        <span style="font-size:0.8rem;color:#64748b;">
+          □ 4×4 매트릭스 시료 제조 (Sample 1~4)<br>
+          □ 가속 안정성 시험 시작 (40°C / 75% RH)<br>
+          □ 1·3개월 시점 V/V₀ · a_w · 외관 측정<br>
+          □ 포장재 WVTR 실측 → 24개월 V/V₀ 선형 외삽
+        </span>
+      </li>
+      <li>
+        <span class="ln-priority ln-p2">Phase 3</span>
+        <strong>처방 최적화 (9~12주, 병행)</strong><br>
+        <span style="font-size:0.8rem;color:#64748b;">
+          □ Phase 1·2 결과 기반 처방 미세 조정 (트레할로스 첨가 여부 결정)<br>
+          □ 사용감 평가 (피부 적용 시 점착성·흡수성·잔여감)<br>
+          □ 분주 공정 호환성 재검증
+        </span>
+      </li>
+      <li>
+        <span class="ln-priority ln-p2">Phase 4</span>
+        <strong>양산 준비 (13주 이후)</strong><br>
+        <span style="font-size:0.8rem;color:#64748b;">
+          □ 최종 처방 확정 및 스펙 문서화<br>
+          □ 포장 설비 검증 (시일 온도·압력 SOP)<br>
+          □ 장기 실시간 안정성 시험 시작 (25°C / 60% RH, 24개월)<br>
+          □ 허가·인허가 서류 준비 (안정성 데이터 포함)
+        </span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 9. 위험 요소 -->
+  <div class="ln-section">
+    <div class="ln-section-title">9. 위험 요소 및 대응 방안</div>
+    <table class="ln-table">
+      <thead>
+        <tr><th>위험 요소</th><th>영향</th><th>대응 방안</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>시일 불량 (핀홀)</strong></td>
+          <td>WVTR 급증, 손실 가속</td>
+          <td>100% 인라인 핀홀 검사 + 주기적 시일 강도 시험</td>
+        </tr>
+        <tr>
+          <td><strong>운송 중 고온 노출</strong></td>
+          <td>점도 변화, 성분 분리</td>
+          <td>콜드체인 또는 단열 박스 사용, 온도 지시 스티커 부착</td>
+        </tr>
+        <tr>
+          <td><strong>HA–보습제 호환성</strong></td>
+          <td>점도·외관 변화, 겔화</td>
+          <td>Phase 1 초기에 호환성 시험 (1주차 내)</td>
+        </tr>
+        <tr>
+          <td><strong>농축 시 결정화</strong></td>
+          <td>외관 불량, 분주 불가</td>
+          <td>트레할로스 첨가(옵션 C) 또는 BG 농도 상향으로 결정 억제</td>
+        </tr>
+        <tr>
+          <td><strong>k₂ 외삽 오차 (10 kDa)</strong></td>
+          <td>이론치-실측치 불일치</td>
+          <td>Phase 2에서 실측 a_w 역산으로 k₂ 보정, 시뮬레이터 업데이트</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 10. 핵심 결론 -->
+  <div class="ln-section">
+    <div class="ln-section-title">10. 핵심 결론 및 의사결정</div>
+
+    <div class="ln-conclusion" style="margin-bottom:12px;">
+      <strong>결론 1 — 비교의 틀을 바꿔야 한다</strong><br>
+      시뮬레이터는 폐쇄계 평형 모델, 예비 실험은 개방계 비평형 측정. 두 결과의 격차는 "시뮬레이터 오류"가 아니라 <strong>계(system)의 정의가 다른 것</strong>이 원인.
+    </div>
+    <div class="ln-conclusion" style="margin-bottom:12px;">
+      <strong>결론 2 — 손실의 원인은 "처방"보다 "환경의 가혹함"</strong><br>
+      동일 처방도 개방계(RH=24%)에서는 거의 완전 건조, 밀봉 Al파우치에서는 V/V₀ ~89% 유지 예상. <strong>포장 설계가 처방보다 결정적</strong>.
+    </div>
+    <div class="ln-strategy-box">
+      <strong>의사결정 트리 — 85% 보존 달성 경로</strong><br><br>
+      STEP 1. <strong>즉시 밀봉 + 현재 처방</strong> → Phase 1 실험으로 V/V₀ 측정<br>
+      &nbsp;&nbsp;&nbsp;└ ≥ 85% 달성 → Al파우치만으로 충분, 처방 변경 불필요<br>
+      &nbsp;&nbsp;&nbsp;└ &lt; 85% 달성 → STEP 2 진행<br><br>
+      STEP 2. <strong>옵션 B 처방 + Al파우치</strong> → 이론 ~89%, Phase 2로 검증<br>
+      &nbsp;&nbsp;&nbsp;└ ≥ 85% 달성 → 처방 B + Al파우치 확정<br>
+      &nbsp;&nbsp;&nbsp;└ &lt; 85% 달성 → STEP 3 진행<br><br>
+      STEP 3. <strong>옵션 C (+ 트레할로스) + Al파우치</strong> → 이론 ~91%<br>
+      &nbsp;&nbsp;&nbsp;└ 사용감 이슈 시 PD·BG 비율 조정 후 재평가
+    </div>
+    <div class="ln-alert" style="margin-top:12px;">
+      ⚠ 모든 수치는 이론값 또는 1차 추정값. Phase 1 실험(4주 이내, 추가 재료 불필요)만으로 STEP 1 의사결정 가능 — <strong>즉시 착수 권장.</strong>
+    </div>
+  </div>
+
+</div><!-- .lab-note (전략 보고서) -->
+
 </div><!-- #tab-labnote -->
 
 <script>
