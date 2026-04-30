@@ -760,6 +760,32 @@ input[type=range].ha-range { accent-color: #0d9488; }
   color: #1e3a8a;
   line-height: 1.65;
 }
+.ln-pass { color: #16a34a; font-weight: 700; }
+.ln-fail { color: #dc2626; font-weight: 700; }
+.ln-neutral { color: #64748b; }
+.ln-priority {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.ln-p1 { background: #dc2626; color: #fff; }
+.ln-p2 { background: #2563eb; color: #fff; }
+.ln-p3 { background: #64748b; color: #fff; }
+.ln-strategy-box {
+  background: #f0fdf4;
+  border: 1.5px solid #16a34a;
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 0.84rem;
+  color: #14532d;
+  line-height: 1.7;
+  margin-top: 14px;
+}
+.ln-strategy-box strong { color: #15803d; }
 .ln-download-row {
   display: flex;
   justify-content: flex-end;
@@ -1995,6 +2021,194 @@ input[type=range].ha-range { accent-color: #0d9488; }
       <li><strong>환경 제어</strong> — 항온항습 챔버(RH 일정 유지) 조건에서 재실험 권고</li>
       <li><strong>85% 달성 조건</strong> — RH 39.6% 이상 유지 또는 공용매(글리세롤 등) 첨가 검토</li>
     </ul>
+  </div>
+
+
+  <!-- 8. 포장 내 부피 보존 85% 달성 실험 전략 -->
+  <div class="ln-section">
+    <div class="ln-section-title">8. 포장 내 부피 보존 85% 달성 실험 전략</div>
+
+    <!-- 목표 정의 -->
+    <div class="ln-conclusion" style="margin-bottom:16px;">
+      <strong>목표</strong>: 포장 개봉 전 상태에서 컵당 담지 볼륨이 초기 대비 <strong>V_eq/V₀ ≥ 85%</strong> 유지<br>
+      현재 조건(MW 10 kDa · c₀ 20 mg/mL · RH 24%) → 이론 잔류율 <strong style="color:#dc2626;">68.4%</strong> — 목표 대비 <strong style="color:#dc2626;">16.6%p 부족</strong>
+    </div>
+
+    <!-- 이론 배경 -->
+    <div style="font-size:0.82rem;color:#334155;margin-bottom:14px;background:#f8fafc;border-radius:8px;padding:12px 16px;line-height:1.8;">
+      <strong style="color:#1e40af;">물리 모델</strong><br>
+      V_eq/V₀ = c₀ / c_eq &nbsp;·&nbsp; c_eq = √(−ln(RH) / k₂) &nbsp;·&nbsp; k₂ = 0.006209 × MW<sup>−0.570</sup><br>
+      → RH ↑, c₀ ↑, MW ↓ (k₂ ↑) 가 모두 잔류율을 높이는 방향으로 작용
+    </div>
+
+    <!-- 레버 분석 표 -->
+    <div style="margin-bottom:18px;">
+      <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:8px;">▸ 레버별 85% 달성 임계값</div>
+      <table class="ln-table">
+        <thead>
+          <tr>
+            <th>레버</th>
+            <th>현재값</th>
+            <th>이론 잔류율</th>
+            <th>85% 달성 임계</th>
+            <th>임계값 잔류율</th>
+            <th>비고</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>포장 내 RH</strong></td>
+            <td>24%</td>
+            <td class="ln-fail">68.4%</td>
+            <td><strong>≥ 40%</strong></td>
+            <td class="ln-pass">85.4%</td>
+            <td>c₀ = 20 mg/mL, MW = 10 kDa 고정</td>
+          </tr>
+          <tr>
+            <td><strong>초기 농도 c₀</strong></td>
+            <td>20 mg/mL</td>
+            <td class="ln-fail">68.4%</td>
+            <td><strong>≥ 25 mg/mL</strong></td>
+            <td class="ln-pass">85.6%</td>
+            <td>MW = 10 kDa, RH = 24% 고정 / 30 mg/mL 이상: 즉시 평형(증발 없음)</td>
+          </tr>
+          <tr>
+            <td><strong>분자량 MW</strong></td>
+            <td>10 kDa</td>
+            <td class="ln-fail">68.4%</td>
+            <td><strong>≤ 4 kDa</strong></td>
+            <td class="ln-pass">96.5% (3 kDa)</td>
+            <td>c₀ = 20 mg/mL, RH = 24% 고정 / 5 kDa → 83.4% (아슬)</td>
+          </tr>
+          <tr>
+            <td><strong>밀봉 타이밍</strong></td>
+            <td>개방 노출</td>
+            <td class="ln-fail">68.4%↓</td>
+            <td><strong>담지 즉시 밀봉</strong></td>
+            <td class="ln-pass">~100%</td>
+            <td>a_w(초기) = 0.51 → 밀봉 시 내부 RH → 51% 수렴 → 증발 정지</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 분자량-RH 매트릭스 -->
+    <div style="margin-bottom:18px;">
+      <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:8px;">▸ MW × RH 잔류율 매트릭스 (c₀ = 20 mg/mL)</div>
+      <table class="ln-table">
+        <thead>
+          <tr>
+            <th>MW \ RH</th>
+            <th>24%</th>
+            <th>30%</th>
+            <th>35%</th>
+            <th>40%</th>
+            <th>50%</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>3 kDa</strong></td>
+            <td class="ln-pass">96.5%</td>
+            <td class="ln-pass">100%</td>
+            <td class="ln-pass">100%</td>
+            <td class="ln-pass">100%</td>
+            <td class="ln-pass">100%</td>
+          </tr>
+          <tr>
+            <td><strong>5 kDa</strong></td>
+            <td class="ln-neutral">83.4%</td>
+            <td class="ln-pass">90.8%</td>
+            <td class="ln-pass">97.2%</td>
+            <td class="ln-pass">100%</td>
+            <td class="ln-pass">100%</td>
+          </tr>
+          <tr>
+            <td><strong>10 kDa ← 현재</strong></td>
+            <td class="ln-fail">68.4%</td>
+            <td class="ln-neutral">74.5%</td>
+            <td class="ln-neutral">79.8%</td>
+            <td class="ln-pass">85.4%</td>
+            <td class="ln-pass">98.2%</td>
+          </tr>
+          <tr>
+            <td><strong>50 kDa</strong></td>
+            <td class="ln-fail">43.3%</td>
+            <td class="ln-fail">47.1%</td>
+            <td class="ln-fail">50.4%</td>
+            <td class="ln-fail">54.0%</td>
+            <td class="ln-neutral">62.1%</td>
+          </tr>
+          <tr>
+            <td><strong>100 kDa</strong></td>
+            <td class="ln-fail">35.5%</td>
+            <td class="ln-fail">38.7%</td>
+            <td class="ln-fail">41.4%</td>
+            <td class="ln-fail">44.3%</td>
+            <td class="ln-fail">50.9%</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="font-size:0.74rem;color:#64748b;margin-top:6px;">* 초록: ≥85%, 회색: 70~85%, 빨강: &lt;70% / 100%는 a_w₀ ≤ RH (즉시 평형, 증발 없음)</div>
+    </div>
+
+    <!-- 우선순위 실험 계획 -->
+    <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:10px;">▸ 단계별 실험 계획</div>
+    <ul class="ln-obs-list">
+      <li>
+        <span class="ln-priority ln-p1">P1</span>
+        <strong>실험 A — 밀봉 타이밍 비교</strong> (1주 이내, 추가 재료 불필요)<br>
+        <span style="font-size:0.8rem;color:#64748b;margin-left:0;">
+          담지 후 0·5·15·30분 개방 → 각각 밀봉 → 72 hr 후 중량 측정.<br>
+          목적: 개방 노출 시간에 따른 실측 잔류율 곡선 확보 + 밀봉 즉시가 85% 달성 임계인지 검증.
+        </span>
+      </li>
+      <li>
+        <span class="ln-priority ln-p1">P1</span>
+        <strong>실험 B — 초기 농도 비교</strong> (1주 이내)<br>
+        <span style="font-size:0.8rem;color:#64748b;">
+          c₀ = 20 / 25 / 30 mg/mL, 동일 환경(RH ≈ 24%) 개방 24 hr 비교.<br>
+          목적: 이론값(25 mg/mL → 85.6%, 30 mg/mL → 즉시 평형) 실측 검증 + k₂ 외삽 보정 기준점 확보.
+        </span>
+      </li>
+      <li>
+        <span class="ln-priority ln-p2">P2</span>
+        <strong>실험 C — RH 제어 챔버</strong> (2~3주, 항온항습 챔버 필요)<br>
+        <span style="font-size:0.8rem;color:#64748b;">
+          RH = 35 / 40 / 45 / 50%, T = 23 °C 고정, 개방 24 hr.<br>
+          목적: RH = 40% 임계값 이론 검증 + MW = 10 kDa k₂ 역추정으로 외삽 오차 보정.
+        </span>
+      </li>
+      <li>
+        <span class="ln-priority ln-p2">P2</span>
+        <strong>실험 D — 분자량 비교</strong> (2~3주, 저분자량 HA 배송 후)<br>
+        <span style="font-size:0.8rem;color:#64748b;">
+          MW = 5 / 10 / 50 kDa, c₀ = 20 mg/mL, RH ≈ 24%, 개방 24 hr.<br>
+          목적: MW ↓ → 잔류율 ↑ 경향 실측 + k₂ 실측값으로 시뮬레이터 보정.
+        </span>
+      </li>
+      <li>
+        <span class="ln-priority ln-p3">P3</span>
+        <strong>실험 E — 공용매 첨가</strong> (중기, 글리세롤 원료 확보 후)<br>
+        <span style="font-size:0.8rem;color:#64748b;">
+          글리세롤 5 / 10 / 20% 첨가, DVS(동적 수증기 흡착) 또는 간이 a_w 측정으로 k₂_eff 도출.<br>
+          목적: 공용매에 의한 수분활성도 상승 효과 정량화 → 시뮬레이터에 a_w 보정 항 추가.
+        </span>
+      </li>
+    </ul>
+
+    <!-- 최우선 전략 결론 -->
+    <div class="ln-strategy-box">
+      <strong>최우선 권장 전략 (우선순위 순)</strong><br>
+      ① 담지 직후 즉시 밀봉 — 가장 간단하고 비용 없는 즉시 적용 가능 방법. 내부 RH가 용액 a_w = 0.51에 수렴하면 이론상 증발 정지.<br>
+      ② c₀를 <strong>25 mg/mL (2.5% w/v)로 증량</strong> — 동일 k₂, 동일 RH에서 이론 잔류율 68.4% → 85.6%로 개선.<br>
+      ③ 포장 내 RH <strong>≥ 40%</strong> 확보 — 밀봉 전 포장 내부 가습 또는 습도 버퍼 소재 동봉.<br>
+      <br>
+      ①+③ 복합 시 이론상 <strong>95% 이상 잔류</strong> 예상 — 실험 A·C로 검증 필요.
+    </div>
+    <div class="ln-alert" style="margin-top:10px;">
+      ⚠ 위 이론값은 k₂ 피팅 범위(50 kDa~2 MDa) 외 10 kDa 외삽에 기반. 실험 B·C에서 실측 k₂ 보정 전까지 정량적 임계값 ±20% 오차 감안 필요.
+    </div>
   </div>
 
 </div><!-- .lab-note -->
