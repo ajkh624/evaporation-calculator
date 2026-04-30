@@ -2284,9 +2284,9 @@ input[type=range].ha-range { accent-color: #0d9488; }
         </tr>
         <tr>
           <td><strong>초기 a_w</strong></td>
-          <td>k₂ 외삽 (10 kDa, 피팅 범위 밖)</td>
-          <td>2% HA 용액 a_w ≈ 0.999 (거의 순수물)</td>
-          <td class="ln-fail">초기 증발 억제 과대 추정</td>
+          <td>k₂ 외삽 → 0.512 (10 kDa, 피팅 범위 밖)</td>
+          <td>Raoult's law → <strong>0.965</strong> (올리고머, 네트워크 미형성) — 실측 필요</td>
+          <td class="ln-fail">k₂ 외삽이 수분 억제를 크게 과대 추정</td>
         </tr>
         <tr>
           <td><strong>상 전이</strong></td>
@@ -2297,7 +2297,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
       </tbody>
     </table>
     <div class="ln-alert" style="margin-top:12px;">
-      ⚠ 결론: 시뮬레이터는 <strong>폐쇄계 평형 예측 도구</strong>이고 예비 실험은 <strong>개방계 비평형 동역학</strong>을 측정한 것 — 두 값을 동일 축에서 비교하는 것은 원천적으로 부적절.
+      ⚠ 결론: 시뮬레이터는 <strong>RH 고정 개방계에서의 Stefan 확산</strong>을 모델링하지만, 10 kDa k₂ 외삽이 수분 억제를 과대 추정하고 상전이를 미반영. 예비 실험은 RH 변동 개방계 — 두 값을 동일 축에서 비교하려면 k₂ 실측값 먼저 필요.
     </div>
   </div>
 
@@ -2409,23 +2409,23 @@ input[type=range].ha-range { accent-color: #0d9488; }
         <tr>
           <td><strong>현재</strong></td>
           <td>HA 2% + 정제수 98%</td>
-          <td>~0.999</td>
+          <td>~0.965 <sup>①</sup></td>
           <td>낮음</td>
           <td>매우 좋음</td>
-          <td class="ln-fail">~76%</td>
+          <td class="ln-neutral">~85% <sup>②</sup></td>
         </tr>
         <tr>
           <td><strong>A</strong></td>
           <td>글리세롤 5% + HA 2% + 정제수</td>
-          <td>0.97</td>
+          <td>~0.95</td>
           <td>낮음</td>
           <td>좋음</td>
-          <td class="ln-neutral">~84%</td>
+          <td class="ln-pass">~87%</td>
         </tr>
         <tr style="background:#f0fdf4;">
           <td><strong>B (권장)</strong></td>
           <td>글리세롤 10% + PD 5% + BG 3% + HA 2% + 정제수 80%</td>
-          <td>0.93</td>
+          <td>~0.93 <sup>③</sup></td>
           <td>중간</td>
           <td>보통</td>
           <td class="ln-pass"><strong>~89%</strong></td>
@@ -2433,7 +2433,7 @@ input[type=range].ha-range { accent-color: #0d9488; }
         <tr>
           <td><strong>C</strong></td>
           <td>B + 트레할로스 3%</td>
-          <td>0.85</td>
+          <td>~0.90</td>
           <td>중간</td>
           <td>약간 무거움</td>
           <td class="ln-pass">~91%</td>
@@ -2448,6 +2448,57 @@ input[type=range].ha-range { accent-color: #0d9488; }
         </tr>
       </tbody>
     </table>
+
+    <div class="ln-alert" style="margin-bottom:14px;background:#f0f9ff;border-color:#38bdf8;color:#0c4a6e;">
+      <strong>① ② ③ a_w 값 근거 및 한계</strong><br>
+      ① 10 kDa HA 2%: Raoult's law(몰분율 기반) → 0.965. k₂ 외삽 모델은 0.512로 예측하나 10 kDa는 올리고머로 고분자 네트워크 효과가 없어 외삽값은 신뢰 불가.<br>
+      ② Al파우치 24개월 V/V₀: a_w=0.965, WVTR&lt;0.01, 보관 60% RH 기준 선형 추정값. 보관 조건·포장 면적·시일 품질에 따라 ±5~10%p 변동.<br>
+      ③ 옵션 B a_w=0.93: Raoult's law + 보습제 조성 추정. <strong>모든 a_w 값은 실측(Novasina/AquaLab) 확인 전까지 추정치.</strong>
+    </div>
+
+    <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:8px;">▸ MW와 보존성 관계 — 핵심 분리</div>
+    <table class="ln-table" style="margin-bottom:14px;">
+      <thead>
+        <tr><th>HA MW</th><th>a_w (Raoult)</th><th>a_w (k₂ 모델)</th><th>실제 신뢰 모델</th><th>포장 보존 기여</th><th>피부 전달</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>10 kDa</td>
+          <td>0.965</td>
+          <td>0.512 <span style="color:#dc2626">⚠외삽</span></td>
+          <td>Raoult (올리고머)</td>
+          <td class="ln-neutral">낮음 — 보습제로 보완</td>
+          <td class="ln-pass">침투 우수</td>
+        </tr>
+        <tr>
+          <td>100 kDa</td>
+          <td>0.996</td>
+          <td>0.835 <span style="color:#f59e0b">⚠외삽</span></td>
+          <td>중간 (네트워크 형성 시작)</td>
+          <td class="ln-neutral">낮음 — 보습제로 보완</td>
+          <td class="ln-neutral">표면~중간</td>
+        </tr>
+        <tr>
+          <td>500 kDa</td>
+          <td>0.999</td>
+          <td>0.931 ✓</td>
+          <td>k₂ (피팅 범위 내)</td>
+          <td class="ln-neutral">낮음 — 보습제로 보완</td>
+          <td class="ln-fail">표면 잔류</td>
+        </tr>
+        <tr>
+          <td>1000 kDa</td>
+          <td>~1.000</td>
+          <td>0.953 ✓</td>
+          <td>k₂ (피팅 범위 내)</td>
+          <td class="ln-neutral">낮음 — 보습제로 보완</td>
+          <td class="ln-fail">표면 필름 형성</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="ln-conclusion" style="margin-bottom:14px;">
+      <strong>MW 선택 결론</strong>: HA의 MW는 포장 보존성(WVTR 구동력)에 거의 차이를 만들지 않는다. a_w 차이가 0.965 vs 0.953으로 미미하기 때문이다. <strong>보존성은 글리세롤·BG·PD(보습제)가 결정하고, MW는 피부 전달 깊이로 선택해야 한다.</strong> 10 kDa는 침투 목적으로 타당한 선택이며, 보존 문제는 Al파우치 + 즉시 밀봉 + 보습제로 해결한다.
+    </div>
 
     <div style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:8px;">▸ 옵션 B 처방 상세 (권장)</div>
     <div style="background:#f0fdf4;border:1.5px solid #16a34a;border-radius:8px;padding:14px 18px;font-size:0.84rem;font-family:monospace;line-height:1.9;">
@@ -2676,7 +2727,11 @@ input[type=range].ha-range { accent-color: #0d9488; }
     </div>
     <div class="ln-conclusion" style="margin-bottom:12px;">
       <strong>결론 2 — 손실의 원인은 "처방"보다 "환경의 가혹함"</strong><br>
-      동일 처방도 개방계(RH=24%)에서는 거의 완전 건조, 밀봉 Al파우치에서는 V/V₀ ~89% 유지 예상. <strong>포장 설계가 처방보다 결정적</strong>.
+      동일 처방도 개방계(RH=24%)에서는 거의 완전 건조, 밀봉 Al파우치에서는 V/V₀ ~85~89% 유지 예상. <strong>포장 설계(WVTR)가 처방보다 결정적.</strong>
+    </div>
+    <div class="ln-conclusion" style="margin-bottom:12px;">
+      <strong>결론 3 — MW를 바꿔도 보존성은 개선되지 않는다</strong><br>
+      HA는 MW 무관하게 a_w ≈ 0.95~0.97 (2% 기준). WVTR 구동력 차이가 미미해 보존성에 기여하지 않는다. MW는 <strong>피부 침투 깊이 목적</strong>으로 선택하고, 보존은 보습제(글리세롤 10% + PD 5% + BG 3%)로 해결한다. 10 kDa 선택을 유지해도 된다.
     </div>
     <div class="ln-strategy-box">
       <strong>의사결정 트리 — 85% 보존 달성 경로</strong><br><br>
