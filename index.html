@@ -1018,9 +1018,11 @@ input[type=range].ha-range { accent-color: #0d9488; }
         <!-- HA 공식 섹션 -->
         <div id="ha-formula-section" style="display:none;">
           <div class="formula-section ha-formula-divider">▸ 히알루론산 (HA) 모델</div>
-          <code class="eq teal">a_w(c) = exp(−k₂·c²) &nbsp;[c: mg/mL]</code>
+          <code class="eq teal">MW ≥ 50 kDa: a_w = exp(−k₂·c²) &nbsp;[고분자 네트워크]</code>
+          <code class="eq teal">MW ≤ 10 kDa: a_w = exp(−c·18 / (MW·10⁶)) &nbsp;[Raoult 법칙]</code>
+          <code class="eq teal">10~50 kDa: ln(a_w) 선형 보간 (전환 구간)</code>
           <code class="eq teal">c_HA(t) = c₀·V₀ / V(t)</code>
-          <code class="eq teal">평형: c_eq = √(−ln(RH) / k₂)</code>
+          <code class="eq teal">평형 (≥50 kDa): c_eq = √(−ln(RH) / k₂)</code>
           <div class="val-row" style="margin-top:6px;">
             <span class="lbl">MW</span><span class="val teal" id="f-mw">—</span>
             <span class="lbl">k₂</span><span class="val teal" id="f-k2">—</span>
@@ -1193,9 +1195,9 @@ input[type=range].ha-range { accent-color: #0d9488; }
             <span>이 "잡아두는 힘"을 <strong>수분 활성도(a_w)</strong>라고 해요. a_w가 낮을수록 증발이 적어요.</span>
           </div>
         </div>
-        <div class="explain-formula-row">a_w = exp(−k₂ · c²) &nbsp;&nbsp; [c: 농도 mg/mL]</div>
+        <div class="explain-formula-row">MW ≥ 50 kDa: a_w = exp(−k₂·c²) &nbsp;·&nbsp; MW ≤ 10 kDa: Raoult 법칙 (a_w ≈ 1)</div>
         <div style="padding:8px 14px 12px; font-size:0.78rem; color:#64748b;">
-          📌 비유: 설탕이 많이 녹은 시럽은 순수한 물보다 훨씬 천천히 마르는 것과 같은 원리!
+          📌 10 kDa 이하 올리고머는 물 분자를 잡는 네트워크를 형성 못 해 a_w ≈ 1 — 거의 순수물처럼 증발해요.
         </div>
       </div>
 
@@ -1310,21 +1312,22 @@ input[type=range].ha-range { accent-color: #0d9488; }
         <div class="explain-body">
           <div class="explain-step">
             <span class="step-num amber">1</span>
-            <span><strong>같은 무게</strong>(mg/mL)라도 분자량이 작으면 <strong>분자 수가 더 많아요</strong>.<br>
-            예: 50 kDa는 1 MDa보다 <span class="key-badge down">20배 많은 분자</span></span>
+            <span><strong>고분자 HA (≥50 kDa)</strong>는 네트워크를 형성해 물을 강하게 붙잡아요.<br>
+            분자량 ↑ → k₂ ↓ → c_eq ↑ → 더 많이 증발 후 평형 도달</span>
           </div>
           <div class="explain-step">
             <span class="step-num amber">2</span>
-            <span>물을 붙잡는 힘(삼투압)은 분자 <strong>무게</strong>가 아니라 <strong>개수</strong>에 비례해요.</span>
+            <span><strong>올리고머 HA (≤10 kDa)</strong>는 네트워크 없이 용액 상태.<br>
+            Raoult 법칙 적용 → a_w ≈ 1 → <span class="key-badge down">증발 억제 거의 없음</span></span>
           </div>
           <div class="explain-step">
             <span class="step-num amber">3</span>
-            <span>분자 수 ↑ → 삼투압 ↑ → k₂ ↑ → <strong>평형 농도 c_eq ↓</strong> → <span class="key-badge up">잔류 부피 ↑</span></span>
+            <span><strong>10~50 kDa</strong>는 두 모델 사이 전환 구간 — 실측 데이터 없어 보간 처리.</span>
           </div>
         </div>
-        <div class="explain-formula-row">c_eq = √(−ln(RH) / k₂) &nbsp; → &nbsp; k₂↑이면 c_eq↓, V_eq↑</div>
+        <div class="explain-formula-row">≥50 kDa: c_eq = √(−ln(RH)/k₂) &nbsp;·&nbsp; ≤10 kDa: 증발 정지 없음 (a_w ≈ 1)</div>
         <div style="padding:8px 14px 12px; font-size:0.78rem; color:#64748b;">
-          📌 비유: 각설탕 1개 vs 가루설탕 20개 — 같은 무게라도 가루가 물에서 삼투압이 더 강해요!
+          📌 10 kDa HA 20 mg/mL 실험이 거의 완전 건조된 이유 — Raoult 법칙으로는 a_w ≈ 0.9999, 증발 구동력이 사라지지 않아요.
         </div>
       </div>
 
