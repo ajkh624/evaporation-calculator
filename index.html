@@ -2773,19 +2773,25 @@ function simulateHA(T_C, RH_pct, rb_mm, rt_mm, H_mm, V0_uL, c0_mgmL, mw_kDa, tau
   const V0_m3 = Math.min(V0_uL * 1e-9, Vmax);
   const h0    = findH0(V0_m3, rb, rt, H);
 
-  // 겔화 농도: MW < 50 kDa는 올리고머로 겔 미형성 → Infinity
-  const c_gel = mw_kDa < 50 ? Infinity : 27778 / Math.pow(mw_kDa, 0.78);
+  // 겔화 농도: MW ≤ 10 kDa 올리고머는 겔 미형성 → Infinity
+  const c_gel = mw_kDa <= 10 ? Infinity : 27778 / Math.pow(mw_kDa, 0.78);
 
-  // MW 기반 a_w 모델 선택
-  // < 50 kDa: Raoult 법칙 (올리고머, 네트워크 효과 없음)
-  // ≥ 50 kDa: polymer network 경험식 exp(-k₂·c²)
-  const aWFromConc = (c) => mw_kDa < 50
-    ? Math.exp(-c * 18 / (mw_kDa * 1e6))
-    : Math.exp(-k2 * c * c);
+  // MW 기반 a_w 모델 — 10~50 kDa 전환 구간에서 ln(a_w) 선형 보간
+  // < 10 kDa : Raoult 법칙 (올리고머)
+  // 10~50 kDa: 두 모델 선형 혼합 (w=0→Raoult, w=1→k₂)
+  // > 50 kDa : polymer network 경험식 exp(-k₂·c²)
+  const aWFromConc = (c) => {
+    const ln_raoult = -c * 18 / (mw_kDa * 1e6);
+    const ln_k2     = -k2 * c * c;
+    if (mw_kDa <= 10) return Math.exp(ln_raoult);
+    if (mw_kDa >= 50) return Math.exp(ln_k2);
+    const w = (mw_kDa - 10) / 40;  // 0 at 10 kDa → 1 at 50 kDa
+    return Math.exp((1 - w) * ln_raoult + w * ln_k2);
+  };
 
   // 종료 RH 기준 평형 농도 (표시용)
   const ln_RH_end = (RH_end > 1e-9 && RH_end < 1) ? -Math.log(RH_end) : 0;
-  const c_eq = mw_kDa < 50
+  const c_eq = mw_kDa <= 10
     ? (ln_RH_end > 0 ? ln_RH_end * mw_kDa * 1e6 / 18 : Infinity)
     : (ln_RH_end > 0 ? Math.sqrt(ln_RH_end / k2) : Infinity);
 
@@ -2843,7 +2849,7 @@ function simulateHA(T_C, RH_pct, rb_mm, rt_mm, H_mm, V0_uL, c0_mgmL, mw_kDa, tau
 
     // 현재 RH 기준 순간 평형 농도
     const ln_RH_t  = (RH_t > 1e-9 && RH_t < 1) ? -Math.log(RH_t) : 0;
-    const c_eq_t = mw_kDa < 50
+    const c_eq_t = mw_kDa <= 10
       ? (ln_RH_t > 0 ? ln_RH_t * mw_kDa * 1e6 / 18 : Infinity)
       : (ln_RH_t > 0 ? Math.sqrt(ln_RH_t / k2) : Infinity);
 
@@ -3323,12 +3329,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const mwName = fmtMW(mw_kDa);
       const RH = p.RH / 100;
       const ln_RH = (RH > 1e-9 && RH < 1) ? -Math.log(RH) : 0;
-      const c_eq = mw_kDa < 50
+      const c_eq = mw_kDa <= 10
         ? (ln_RH > 0 ? ln_RH * mw_kDa * 1e6 / 18 : Infinity)
         : (ln_RH > 0 ? Math.sqrt(ln_RH / k2) : Infinity);
-      const a_w_init = mw_kDa < 50
-        ? Math.exp(-c0 * 18 / (mw_kDa * 1e6))
-        : Math.exp(-k2 * c0 * c0);
+      const ln_r = -c0 * 18 / (mw_kDa * 1e6);
+      const ln_k = -k2 * c0 * c0;
+      const a_w_init = mw_kDa <= 10 ? Math.exp(ln_r)
+        : mw_kDa >= 50 ? Math.exp(ln_k)
+        : Math.exp((1 - (mw_kDa - 10) / 40) * ln_r + ((mw_kDa - 10) / 40) * ln_k);
       haParams = { k2, mwName, c_eq, a_w_init };
     }
     updateFormula(res, haEnabled, haParams);
