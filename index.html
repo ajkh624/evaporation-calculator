@@ -2644,7 +2644,8 @@ const RHO = 997;
 const RV  = 461.5;
 
 function D_water(T_K) {
-  return 2.42e-5 * Math.pow(T_K / 293, 1.5);
+  // Fuller et al. 1966: T^1.75 exponent (vs naive Chapman-Enskog T^1.5)
+  return 2.42e-5 * Math.pow(T_K / 293, 1.75);
 }
 
 function c_sat(T_K) {
@@ -2689,7 +2690,8 @@ function simulate(T_C, RH_pct, rb_mm, rt_mm, H_mm, V0_uL) {
   const D     = D_water(T_K);
   const cs    = c_sat(T_K);
   const deltaC = cs * (1 - RH);
-  const lambda = Math.PI * rt / 4;
+  // flanged circular opening end correction: 8r/(3π) = 0.849r (Ogawa & Kaneko 2013)
+  const lambda = 8 * rt / (3 * Math.PI);
   const alpha  = H + lambda - h0;
   const K      = 2 * D * deltaC / RHO;
 
@@ -2764,21 +2766,31 @@ function simulateHA(T_C, RH_pct, rb_mm, rt_mm, H_mm, V0_uL, c0_mgmL, mw_kDa, tau
   const mwName = fmtMW(mw_kDa);
   const D      = D_water(T_K);
   const cs     = c_sat(T_K);
-  const lambda = Math.PI * rt / 4;
+  // flanged circular opening end correction: 8r/(3π) = 0.849r (Ogawa & Kaneko 2013)
+  const lambda = 8 * rt / (3 * Math.PI);
 
   const Vmax  = cupVolume(H, rb, rt, H);
   const V0_m3 = Math.min(V0_uL * 1e-9, Vmax);
   const h0    = findH0(V0_m3, rb, rt, H);
 
-  // 겔화 농도: c* ≈ 27778 / MW_kDa^0.78 (Mark-Houwink 역수)
-  const c_gel = 27778 / Math.pow(mw_kDa, 0.78);
+  // 겔화 농도: MW < 50 kDa는 올리고머로 겔 미형성 → Infinity
+  const c_gel = mw_kDa < 50 ? Infinity : 27778 / Math.pow(mw_kDa, 0.78);
+
+  // MW 기반 a_w 모델 선택
+  // < 50 kDa: Raoult 법칙 (올리고머, 네트워크 효과 없음)
+  // ≥ 50 kDa: polymer network 경험식 exp(-k₂·c²)
+  const aWFromConc = (c) => mw_kDa < 50
+    ? Math.exp(-c * 18 / (mw_kDa * 1e6))
+    : Math.exp(-k2 * c * c);
 
   // 종료 RH 기준 평형 농도 (표시용)
   const ln_RH_end = (RH_end > 1e-9 && RH_end < 1) ? -Math.log(RH_end) : 0;
-  const c_eq      = ln_RH_end > 0 ? Math.sqrt(ln_RH_end / k2) : Infinity;
+  const c_eq = mw_kDa < 50
+    ? (ln_RH_end > 0 ? ln_RH_end * mw_kDa * 1e6 / 18 : Infinity)
+    : (ln_RH_end > 0 ? Math.sqrt(ln_RH_end / k2) : Infinity);
 
   // 초기 수분 활성도
-  const a_w_init = Math.exp(-k2 * c0_mgmL * c0_mgmL);
+  const a_w_init = aWFromConc(c0_mgmL);
 
   // 이미 평형 상태인 경우 (초기 RH 기준)
   if (a_w_init <= RH_start + 1e-9) {
@@ -2825,13 +2837,15 @@ function simulateHA(T_C, RH_pct, rb_mm, rt_mm, H_mm, V0_uL, c0_mgmL, mw_kDa, tau
     const frac    = Math.min(t_s / t_ref_s, 1.0);
     const RH_t    = RH_start + (RH_end - RH_start) * frac;
 
-    // 수분 활성도 & 유효 구동력
-    const a_w        = Math.exp(-k2 * c_HA * c_HA);
+    // 수분 활성도 & 유효 구동력 (MW 기반 모델 선택 적용)
+    const a_w        = aWFromConc(c_HA);
     const deltaC_eff = cs * (a_w - RH_t);
 
     // 현재 RH 기준 순간 평형 농도
     const ln_RH_t  = (RH_t > 1e-9 && RH_t < 1) ? -Math.log(RH_t) : 0;
-    const c_eq_t   = ln_RH_t > 0 ? Math.sqrt(ln_RH_t / k2) : Infinity;
+    const c_eq_t = mw_kDa < 50
+      ? (ln_RH_t > 0 ? ln_RH_t * mw_kDa * 1e6 / 18 : Infinity)
+      : (ln_RH_t > 0 ? Math.sqrt(ln_RH_t / k2) : Infinity);
 
     // 평형 감지
     const nearEq = deltaC_eff <= 1e-18
@@ -3285,8 +3299,9 @@ function updateFormula(res, haEnabled, haParams) {
     const mw_kDa_f = parseFloat(document.getElementById('mw-n').value) || 1000;
     const k2El = document.getElementById('f-k2');
     document.getElementById('f-mw').textContent = haParams.mwName;
-    k2El.textContent = haParams.k2.toExponential(2) + ' mL²/mg²' + (mw_kDa_f < 50 ? ' ⚠ 외삽' : '');
-    k2El.style.color = mw_kDa_f < 50 ? '#dc2626' : '';
+    const k2Note = mw_kDa_f < 50 ? ' ⚠ 외삽' : (mw_kDa_f >= 1000 ? ' ※ 고농도 삼투압 실측 권장' : '');
+    k2El.textContent = haParams.k2.toExponential(2) + ' mL²/mg²' + k2Note;
+    k2El.style.color = mw_kDa_f < 50 ? '#dc2626' : (mw_kDa_f >= 1000 ? '#92400e' : '');
     document.getElementById('f-aw0').textContent = haParams.a_w_init.toFixed(4);
     document.getElementById('f-ceq').textContent = isFinite(haParams.c_eq)
       ? haParams.c_eq.toFixed(1) + ' mg/mL' : '∞';
@@ -3308,8 +3323,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const mwName = fmtMW(mw_kDa);
       const RH = p.RH / 100;
       const ln_RH = (RH > 1e-9 && RH < 1) ? -Math.log(RH) : 0;
-      const c_eq = ln_RH > 0 ? Math.sqrt(ln_RH / k2) : Infinity;
-      const a_w_init = Math.exp(-k2 * c0 * c0);
+      const c_eq = mw_kDa < 50
+        ? (ln_RH > 0 ? ln_RH * mw_kDa * 1e6 / 18 : Infinity)
+        : (ln_RH > 0 ? Math.sqrt(ln_RH / k2) : Infinity);
+      const a_w_init = mw_kDa < 50
+        ? Math.exp(-c0 * 18 / (mw_kDa * 1e6))
+        : Math.exp(-k2 * c0 * c0);
       haParams = { k2, mwName, c_eq, a_w_init };
     }
     updateFormula(res, haEnabled, haParams);
